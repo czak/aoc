@@ -1,8 +1,8 @@
 2017 day 4:
 ===========
 
-CPP:
-====
+CPP
+---
 liked:
 - quite convenient tools for:
 - sorting (sorted string in place)
@@ -40,3 +40,33 @@ overall:
 - solution looks "clean" imho, feels quite functional too with count_if
   and the predicates and the equality & hash concepts
 - surprised along the way with a few moments of "just works"
+
+
+RUST
+----
+- functional style filter/map/split/collect feels more natural than CPP
+- basics for splitting and filtering feel more "available", "at hand"
+- it's more explicit about who owns what
+  - in the CPP solution I must admit I don't know when things are moved,
+    when they are copied, when I pass by reference etc
+  - the Rust one makes it front and center
+- I don't understand why the predicate bound got '&&Vec' (why two?)
+  - and why it still seems to work? am I working on references to references?
+  - makes me uneasy, but mostly because I don't know the ownership well enough yet
+- difference:
+  - cpp accepts a "quick-and-dirty" way, probably suboptimal in terms of references
+    and/or copying; I don't really know who owns and how things are passed, but the end
+    code compiles
+  - Rust expects to get every last detail of this correct (and with specific rules)
+    before it will even compile
+- code in Rust looks messier
+  - might be due to code highlighting - more colors on screen
+  - type annotations
+
+liked:
+- quick access to split_whitespace, collect, filter
+- feels I'm importing less to get the same functionality
+
+didn't like:
+- tried same approach as CPP - implement custom hasher for HashSet, but
+  somehow this felt harder than CPP
