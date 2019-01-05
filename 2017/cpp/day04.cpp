@@ -16,12 +16,10 @@ vector<string> split(string s) {
 }
 
 template<class Hash=hash<string>, class Equal=equal_to<string>>
-struct is_valid {
-  bool operator()(const vector<string>& v) const {
-    unordered_set<string, Hash, Equal> s(v.begin(), v.end());
-    return v.size() == s.size();
-  }
-};
+bool is_valid(const vector<string>& v) {
+  unordered_set<string, Hash, Equal> s(v.begin(), v.end());
+  return v.size() == s.size();
+}
 
 struct ahash {
   size_t operator()(const string& r) const {
@@ -48,9 +46,10 @@ int main() {
     lines.push_back(split(line));
   }
 
-  int count = count_if(lines.begin(), lines.end(), is_valid<>());
+  int count;
+  count = count_if(lines.begin(), lines.end(), is_valid<>);
   cout << "Part 1: " << count << "\n";
 
-  count = count_if(lines.begin(), lines.end(), is_valid<ahash, aequal>());
+  count = count_if(lines.begin(), lines.end(), is_valid<ahash, aequal>);
   cout << "Part 2: " << count << "\n";
 }
