@@ -1,0 +1,42 @@
+2017 day 4:
+===========
+
+CPP:
+====
+liked:
+- quite convenient tools for:
+- sorting (sorted string in place)
+- constructing a set from vector (just construct with {v.begin(), v.end()})
+- liked count_if with my custom predicate
+  - using a function pointer stopped working once i got to templates,
+    but end result is still ok
+    => actually got it to work but needed `is_valid<>`, so great after all
+- quite easy to express concepts like hash & equality
+- first time declaring a template, but it made sense and was quite easy
+- nicely surprised by this:
+
+```
+vector<string> split(string s) {
+  istringstream is {s};
+  return {
+    istream_iterator<string>{is},
+    istream_iterator<string>{},
+  }; // <-- this return is enough to construct a vector of words
+}
+```
+
+didn't like:
+- constantly have to add headers for every single class
+- I had to declare both hash & equal types in order to get the "anagram equality"
+  working; hard to find this in the documentation
+
+missed:
+- getline + vector.push_back is still the best way to read file
+  line by line into vector
+  - istream_iterator would only split by whitespace
+  - decent solution with custom Line type: https://stackoverflow.com/questions/1729772
+
+overall:
+- solution looks "clean" imho, feels quite functional too with count_if
+  and the predicates and the equality & hash concepts
+- surprised along the way with a few moments of "just works"
