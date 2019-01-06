@@ -117,3 +117,23 @@ CPP
 
 CPP
 ---
+- first time implementing the "<<" for my type, but it was nice
+- again had to implement hash for my own type and it worked nice
+- very much impressed by cin for this kind of input
+  - I used std::array for first solution and it was even nicer
+    because I could directly cin into array elements in a for..in loop
+    (no need for a "buffer" element)
+- overall it wasn't getting in my way and I could smoothly iterate
+  my way to solution
+- going back and adding those includes is tiring
+- I think the iterator (cycling back to banks.begin()) worked well.
+  Moving the iterator by ++ and comparing to banks.end() is intuitive enough
+- after I moved from std::array to std::vector, very minimal work needed to be done
+  thanks to the type alias
+  - the hash function needed no change
+  - the << operator needed no change
+  - only had to change the cin reading code
+
+read up on:
+- c++ way of defining a type alias
+  - "using bank_array = std::vector<int>" works
