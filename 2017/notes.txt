@@ -70,3 +70,47 @@ liked:
 didn't like:
 - tried same approach as CPP - implement custom hasher for HashSet, but
   somehow this felt harder than CPP
+
+
+2017 day 5
+==========
+
+RUST
+----
+- reading a file by lines still feels a bit wonky
+- but getting the references and mutating the vector
+  felt okay, I kind of knew where the & and where the *
+  need to go
+- I also often have the intuition that compiler won't
+  allow something, but I save anyway to see the error
+  message and confirm my assumption
+- overall this was a very simple one
+- indexes are usize, but there were negatives so I picked
+  i32, but this means casts are needed a few times
+  casts are still a bit weird to me
+
+CPP
+---
+- reading number via cin >> num is very convenient
+  but writing out via cout << << << feels like a chore
+- surprised (positively I guess) by the warning
+  when comparing int with vector size (comparing ints
+  of different signedness)
+- assigning a vector to another copies it
+  this is convenient, but I still feel I don't know the pattern
+  of copy/reference/value etc
+  - I guess I'm thinking in java terms where every assignment
+    is a reference (I think?)
+  - also compared to Rust, an assignment is a move and you
+    need to be explicit about copying
+  - this gives CPP a head as a "quick and dirty" language
+    but perhaps not great for a long term solution, not sure
+- no easy way to print out larger structures for debugging
+  (a'la Rust's "{:?}")
+
+
+2017 day 6
+==========
+
+CPP
+---
