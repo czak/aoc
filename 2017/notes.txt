@@ -62,6 +62,9 @@ RUST
 - code in Rust looks messier
   - might be due to code highlighting - more colors on screen
   - type annotations
+- devdocs for Rust not great
+  - left pane unhelpful after narrowing down to a struct or a trait
+  - will probably use default docs
 
 liked:
 - quick access to split_whitespace, collect, filter
