@@ -8,7 +8,7 @@ use std::io::{self, BufRead};
 struct Node {
     name: String,
     weight: i32,
-    subtree: i32,
+    total: i32,
     children: Vec<Node>,
 }
 
@@ -38,15 +38,52 @@ fn build_tree(name: String, data: &HashMap<String, HashSet<String>>, weights: &H
 
     let mut node = Node {
         name: String::new(),
-        weight: weights.get(&name).unwrap().to_owned(),
-        subtree: 0,
+        weight: *weights.get(&name).unwrap(),
+        total: 0,
         children,
     };
     node.name = name;
     node
 }
 
-fn calc_tree(root: &mut Node) ->  {
+fn calc_tree(node: &mut Node) -> i32 {
+    node.total = node.weight;
+    for c in node.children.iter_mut() {
+        node.total += calc_tree(c);
+    }
+    node.total
+}
+
+fn find_bad(node: &Node) -> bool {
+    let mut counts: HashMap<i32, i32> = HashMap::new();
+    for c in node.children.iter() {
+        let e = counts.entry(c.total).or_insert(0);
+        *e += 1;
+    }
+    let mut bad = 0;
+    let mut regular = 0;
+    for (k, v) in counts.iter() {
+        if *v == 1 {
+            bad = *k;
+        } else {
+            regular = *k;
+        }
+    }
+    if bad == 0 {
+        return false;
+    }
+    let mut outlier: &Node = &node.children[0];
+    for c in node.children.iter() {
+        if c.total == bad {
+            outlier = c;
+            break;
+        }
+    }
+    if !find_bad(outlier) {
+        println!("Bad: {}, current: {}, expected: {}",
+                 outlier.name, outlier.weight, outlier.weight - (bad-regular));
+    }
+    true
 }
 
 fn main() {
@@ -69,12 +106,12 @@ fn main() {
         }
     }
 
+    // part 1
     let root: String = parents.difference(&children).into_iter().next().unwrap().to_string();
-    println!("{:?}", root);
+    println!("Root: {}", root);
 
     // part 2
-    let tree = build_tree(root, &items, &weights);
-    println!("{:?}", tree);
-
-
+    let mut tree = build_tree(root, &items, &weights);
+    calc_tree(&mut tree);
+    find_bad(&tree);
 }

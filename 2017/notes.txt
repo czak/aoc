@@ -171,3 +171,27 @@ implicit things in rust:
   looking"
 - iterating over a collection yields references to elements
 - dereferencing a reference via dot
+
+
+2017 day 7
+==========
+
+RUST
+----
+- I've made a horrible mess of owned everything
+  - only later (when building the tree) I managed to get away
+    with references
+- slow Regex::new in debug mode - had to move it out of the
+  parsing loop
+- by the time I got to part 2 I had a reasonable intuition
+  about references and could sense how building/traversing
+  the tree will pan out
+- took a lot of shortcuts like initializing mut with some
+  stupid default value (let mut bad = 0); these should not be
+  mut in the first place I guess
+  - or reorder some code so that I can use a reference before
+    I move something
+  - all these should have been organized better
+- regexes - well it's no python
+  - first time I got 3 unwraps in 1 line
+- it doesn't feel like a tool for quick and dirty solutions
