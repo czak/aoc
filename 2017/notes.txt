@@ -137,3 +137,37 @@ CPP
 read up on:
 - c++ way of defining a type alias
   - "using bank_array = std::vector<int>" works
+
+
+RUST
+----
+- implemented pretty much the same thing
+- HashSet of Vec<i32> just worked (i.e. no need for custom hash function)
+  - but I had to be explicit about .clone()'ing the vectors when inserting and pushing
+  - I guess it's a good thing, because the same thing happens in C++
+    only here it's explicit so you are immediately aware
+  - In C++ it didn't feel so "costly" since I didn't explicitly '.clone()'
+- I tried a "cycling iterator" solution, but iter_mut().cycle() doesn't work
+  - iter().cycle().skip(pos) sounded really good
+  - tried some more to do as_mut() later on but 
+- debug build in Rust is faster
+- I wanted to find the max element, hopefully get an iterator pointed at it
+  and continue from there, but ended up with the 3-step dance:
+  - find max element (as i32)
+  - find pos of max in vector (as usize)
+  - then work manually on the vector usinb banks[pos]
+  - it felt like a missed opportunity to continue using the iterator after the find
+    (this is what cpp's max_element allowed me to do)
+- HashSet.contains asked me for reference to element
+  - initially this surprised me, but it's obviously correct (I only want to look
+    at the checked element not move it into the set)
+  - I'd say this is a plus for Rust as it makes this very visible
+
+implicit things in rust:
+- how 'self' is treated in a method call
+  - e.g. iterator transformations move (consume) the old iterator and return a new one
+  - but vector.push only takes a &mut self
+  - "implicit" here meaning "when I look at the point it's used it's not obvious from just
+  looking"
+- iterating over a collection yields references to elements
+- dereferencing a reference via dot
