@@ -195,3 +195,18 @@ RUST
 - regexes - well it's no python
   - first time I got 3 unwraps in 1 line
 - it doesn't feel like a tool for quick and dirty solutions
+
+
+2017 day 8
+==========
+
+CPP
+---
+- first time using regex in cpp; simple enough
+- I'm probably unoptimal where I'm passing strings to cond & op functions
+  - is there copying involved? wasted allocatoins? I dunno
+- error messages from compiler are often scary
+  sometimes it's just a wall of text and types
+- using namespace std is bad, brings in a lot of names like "max", "min", "right"
+  so my "int max" overrides it
+- overall I think the solution is quite readable
