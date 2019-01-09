@@ -183,6 +183,7 @@ RUST
     with references
 - slow Regex::new in debug mode - had to move it out of the
   parsing loop
+  - TIL: lazy_static!
 - by the time I got to part 2 I had a reasonable intuition
   about references and could sense how building/traversing
   the tree will pan out
@@ -210,3 +211,21 @@ CPP
 - using namespace std is bad, brings in a lot of names like "max", "min", "right"
   so my "int max" overrides it
 - overall I think the solution is quite readable
+
+2017 day 9
+==========
+
+RUST
+----
+- easy one plus I like these
+- short and clean with the chars iterator
+  - skipping via a single .next()
+- somehow I didn't anticipate the newline char after reading input string
+  via stdin().read_to_string()
+- used assert/assert_eq, learned about debug_assert_eq! (removed in optimized build)
+- optically this if+match doesn't look super pleasing if you ask me
+  maybe aligning the '=>' would help but I dunno
+
+CPP
+---
+- wrote the same in C++ and again I feel it's "cleaner"
