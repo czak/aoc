@@ -42,25 +42,45 @@ int main() {
     list[i] = i;
   }
 
-  int lengths[50];
-  int nlengths = read_input(lengths);
+  int lengths[100];
+  int nlengths = 0;
+
+  while (1) {
+    int c = fgetc(stdin);
+    if (c == EOF || c == 10) break;
+    lengths[nlengths++] = c;
+  }
+
+  lengths[nlengths++] = 17;
+  lengths[nlengths++] = 31;
+  lengths[nlengths++] = 73;
+  lengths[nlengths++] = 47;
+  lengths[nlengths++] = 23;
 
   int current = 0;
   int skip = 0;
-  int iter = 0;
 
-  // initial
-  print_list(list, current);
+  for (int i=0; i<64; i++) {
+    int iter = 0;
 
-  while (iter < nlengths) {
-    int length = lengths[iter];
-    reverse(list, current, length);
-    current = (current + length + skip) % N;
-    skip++;
+    while (iter < nlengths) {
+      int length = lengths[iter];
+      reverse(list, current, length);
+      current = (current + length + skip) % N;
+      skip++;
 
-    print_list(list, current);
-    iter++;
+      /* print_list(list, current); */
+      iter++;
+    }
   }
 
-  printf("Part 1: %d\n", list[0]*list[1]);
+  printf("Part 2: ");
+  for (int i=0; i<16; i++) {
+    int n = 0;
+    for (int j=0; j<16; j++) {
+      n ^= list[16*i+j];
+    }
+    printf("%02x", n);
+  }
+  printf("\n");
 }
