@@ -1,15 +1,22 @@
-#include <utility>
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
 using namespace std;
 
-using point = pair<int, int>;
+struct point { int x, y; };
 
 point& operator+=(point& self, const point& other) {
-  self.first += other.first;
-  self.second += other.second;
+  self.x += other.x;
+  self.y += other.y;
   return self;
+}
+
+int dist(point& p) {
+  if ((p.x > 0 && p.y > 0) || (p.x < 0 && p.y < 0)) {
+    return abs(p.x) + abs(p.y);
+  } else {
+    return max(abs(p.x), abs(p.y));
+  }
 }
 
 int main() {
@@ -26,12 +33,15 @@ int main() {
     {"nw", {-1, 1}},
   };
 
-  point p {0, 0};
 
+  point p {0, 0};
+  int maxdist = 0;
   string dir;
   while (getline(is, dir, ',')) {
     p += directions[dir];
+    if (dist(p) > maxdist) maxdist = dist(p);
   }
 
-  cout << p.first << ',' << p.second << '\n';
+  cout << "Part 1: " << dist(p) << '\n';
+  cout << "Part 2: " << maxdist << '\n';
 }
