@@ -229,3 +229,48 @@ RUST
 CPP
 ---
 - wrote the same in C++ and again I feel it's "cleaner"
+
+2017 day 10
+===========
+
+C
+- wanted to try the difference C/C++
+- missed:
+  - easier input handling
+    - there's getline but as a GNU extension only
+  - a container type
+- enjoyed
+  - compilation time
+- overall the code is quite readable I think
+
+2017 day 11
+===========
+
+RUST
+----
+- first time implementing operators for custom type
+  - simple enough
+
+CPP
+---
+- literal for unordered_map<string, point> is nice
+- again feel c++ is cleaner
+  - a bit less ceremony around the += operator
+
+2017 day 12
+===========
+
+CPP
+---
+- not very satisfied with the process nor the outcome
+  - union operation for sets missing
+  - had to define the hash for set again
+- missed Python when iterating on the solution
+- I'm not really looking forward complex inputs
+  - if a line has some structure, the regex is a pita
+
+2017 day 13
+===========
+
+Rust
+----
