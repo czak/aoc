@@ -274,3 +274,23 @@ CPP
 
 Rust
 ----
+- definitely not an optimal solution
+- iterating on the solution was quite pleasant
+  - not feeling like a chore
+- Debug trait a big help in (duh) debugging
+- HashMap feels more natural to me than unordered_map
+- I'm looking forward to text parsing in Rust more than CPP
+- debug performance significantly slower than release (5x maybe?)
+- zero issues about ownership this time
+  - reference to HashMap passed around everywhere
+
+2017 day 14
+===========
+
+cpp
+---
+- had the knot hash implemented in C so moved conveniently to CPP
+  - updated to use array<int, 16> instead of C arrays, and string
+- ended up very C-like, but it was quick
+- using grid = array<array<int, 128>, 128> is nice
+  - passing it arround via reference
