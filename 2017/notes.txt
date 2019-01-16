@@ -294,3 +294,16 @@ cpp
 - ended up very C-like, but it was quick
 - using grid = array<array<int, 128>, 128> is nice
   - passing it arround via reference
+
+2017 day 15
+===========
+
+Rust
+----
+- a simple task and a pleasant approach using the Iterator trait
+- with the generators implemented as Iterators, the main loop (the judge)
+  didn't need any change for part 2
+- I think Rust feels more intuitive to me and I look forward to using it
+  for solutions; or maybe it was just lucky this was an easy task and
+  a good fit for Iterator
+- speed was ok even in debug build
