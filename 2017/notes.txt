@@ -307,3 +307,17 @@ Rust
   for solutions; or maybe it was just lucky this was an easy task and
   a good fit for Iterator
 - speed was ok even in debug build
+
+
+2017 day 16
+===========
+
+Rust
+----
+- I cheated and went for Rust again
+- implemented FromStr for 'proper' parsing
+- pattern matching in main loop
+- I'm not even sure if VecDeque is best here,
+  but I kinda knew it would be a cyclic thing
+- had a few smaller battles with borrow checker, but resolved quite
+  intuitively
