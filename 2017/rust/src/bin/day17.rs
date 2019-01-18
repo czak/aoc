@@ -1,4 +1,6 @@
-type Link = Option<Box<Node>>;
+use std::rc::Rc;
+
+type Link = Option<Rc<Node>>;
 
 struct Node {
     val: i32,
@@ -7,14 +9,19 @@ struct Node {
 
 struct List {
     head: Link,
-    current: usize,
+    current: Link,
     len: usize,
 }
 
 impl List {
     fn skip(&mut self, mut count: usize) {
-        count %= self.len;
-        self.current = (self.current + count) % self.len;
+        // count %= self.len;
+        // self.current = (self.current + count) % self.len;
+
+        while count > 0 {
+
+        }
+
     }
 
     fn insert(&mut self, val: i32) {
@@ -23,35 +30,54 @@ impl List {
             current = &mut current.as_mut().unwrap().next;
         }
 
-        println!("Inserting {} after {}", val, current.as_ref().unwrap().val);
+        let next = &mut current.as_mut().unwrap().next;
 
-        let new_node = Box::new(Node {
+        let new_node = Rc::new(Node {
             val,
-            next: None,
+            next: next.take(),
         });
 
         let node = current.as_mut().unwrap();
         node.next = Some(new_node);
-        // new_node.next = current;
-        // *current = Some(new_node);
 
         self.current += 1;
+        self.len += 1;
     }
 }
 
 fn print_list(list: &List) {
     let mut current: &Link = &list.head;
+    let mut i = 0;
     while let Some(node) = current {
-        print!("{},", node.val);
+        if list.current == i {
+            print!("({})  ", node.val);
+        } else {
+            print!("{}  ", node.val);
+        }
         current = &node.next;
+        i += 1;
     }
-    println!();
+    println!("/ current: {}, len: {}", list.current, list.len);
+}
+
+fn part1(list: &List) -> i32 {
+    let mut current = &list.head;
+    let mut i = 0;
+    while let Some(node) = current {
+        if i == list.current + 1 {
+            return node.val;
+        }
+        current = &node.next;
+        i += 1;
+    }
+    panic!();
 }
 
 fn main() {
-    let step = 3;
+    const STEP: usize = 367;
+
     let mut list = List {
-        head: Some(Box::new(Node {
+        head: Some(Rc::new(Node {
             val: 0,
             next: None,
         })),
@@ -59,9 +85,14 @@ fn main() {
         len: 1,
     };
 
-    // list.skip(step);
-    list.insert(17);
-    list.insert(12);
+    for i in 1..=2017 {
+        list.skip(STEP);
+        list.insert(i);
+        
+        if i % 100000 == 0 {
+            println!("{}", i);
+        }
+    }
 
-    print_list(&list);
+    println!("Part 1: {}", part1(&list));
 }
