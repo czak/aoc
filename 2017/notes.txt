@@ -321,3 +321,19 @@ Rust
   but I kinda knew it would be a cyclic thing
 - had a few smaller battles with borrow checker, but resolved quite
   intuitively
+
+
+2017 day 17
+===========
+
+CPP
+---
+- jumped for the linked list and brute-forced both parts
+  - a few minutes runtime for part 2
+- then I learned I don't need to insert everything for part 2 :|
+
+Rust
+----
+- redid with a regular Vec (for part 1) and with just numbers (for part 2)
+- tried a linked list too but it's a PITA here
+  - might try as an exercise anyway
