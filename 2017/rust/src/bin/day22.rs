@@ -1,5 +1,5 @@
 use std::io::{self, Read};
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 type Point = (i32, i32);
 
@@ -10,6 +10,12 @@ enum Direction {
     Down,
 }
 
+enum State {
+    Weakened,
+    Infected,
+    Flagged,
+}
+
 fn main() {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
@@ -17,12 +23,12 @@ fn main() {
     let width: i32 = input.lines().nth(0).unwrap().len() as i32;
     let height: i32 = input.lines().count() as i32;
 
-    let mut infected: HashSet<Point> = HashSet::new();
+    let mut infected: HashMap<Point, State> = HashMap::new();
 
     for (line, y) in input.lines().zip(-height/2..=height/2) {
         for (node, x) in line.chars().zip(-width/2..=width/2) {
             if node == '#' {
-                infected.insert((x, y));
+                infected.insert((x, y), State::Infected);
             }
         }
     }
@@ -32,7 +38,7 @@ fn main() {
     let mut infection_count = 0;
 
     for _ in 0..10000 {
-        if infected.contains(&current) {
+        if infected.contains_key(&current) {
             direction = match direction {
                 Direction::Left => Direction::Up,
                 Direction::Up => Direction::Right,
@@ -47,7 +53,7 @@ fn main() {
                 Direction::Right => Direction::Up,
                 Direction::Down => Direction::Right,
             };
-            infected.insert(current);
+            infected.insert(current, State::Infected);
 
             infection_count += 1;
         }
