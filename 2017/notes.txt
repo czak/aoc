@@ -349,3 +349,12 @@ Rust
   typed arguments in the main `match` was a big plus
 - matching the reference inside of match is still a bit confusing to me
   - sometimes it dereferences implicitly, sometimes it doesn't
+
+2017 day 22
+===========
+
+Rust
+----
+- loved iterator zipped with range
+- loved match with None or Some(..)
+  very elegant way to express this

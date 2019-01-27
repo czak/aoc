@@ -10,6 +10,35 @@ enum Direction {
     Down,
 }
 
+impl Direction {
+    fn turn_right(&self) -> Direction {
+        match self {
+            Direction::Left => Direction::Up,
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+        }
+    }
+
+    fn turn_left(&self) -> Direction {
+        match self {
+            Direction::Left => Direction::Down,
+            Direction::Up => Direction::Left,
+            Direction::Right => Direction::Up,
+            Direction::Down => Direction::Right,
+        }
+    }
+
+    fn reverse(&self) -> Direction {
+        match self {
+            Direction::Left => Direction::Right,
+            Direction::Up => Direction::Down,
+            Direction::Right => Direction::Left,
+            Direction::Down => Direction::Up,
+        }
+    }
+}
+
 enum State {
     Weakened,
     Infected,
@@ -37,34 +66,42 @@ fn main() {
     let mut direction = Direction::Up;
     let mut infection_count = 0;
 
-    for _ in 0..10000 {
-        if infected.contains_key(&current) {
-            direction = match direction {
-                Direction::Left => Direction::Up,
-                Direction::Up => Direction::Right,
-                Direction::Right => Direction::Down,
-                Direction::Down => Direction::Left,
-            };
-            infected.remove(&current);
-        } else {
-            direction = match direction {
-                Direction::Left => Direction::Down,
-                Direction::Up => Direction::Left,
-                Direction::Right => Direction::Up,
-                Direction::Down => Direction::Right,
-            };
-            infected.insert(current, State::Infected);
+    for _ in 0..10000000 {
+        let state = infected.get(&current);
 
-            infection_count += 1;
-        }
+        // 1. new direction
+        direction = match state {
+            None => direction.turn_left(),
+            Some(&State::Weakened) => direction,
+            Some(&State::Infected) => direction.turn_right(),
+            Some(&State::Flagged) => direction.reverse(),
+        };
 
+        // 2. new state
+        match state {
+            None => {
+                infected.insert(current, State::Weakened);
+            },
+            Some(&State::Weakened) => {
+                infected.insert(current, State::Infected);
+                infection_count += 1;
+            },
+            Some(&State::Infected) => {
+                infected.insert(current, State::Flagged);
+            },
+            Some(&State::Flagged) => {
+                infected.remove(&current);
+            },
+        };
+
+        // 3. move
         current = match direction {
             Direction::Left => (current.0 - 1, current.1),
             Direction::Up => (current.0, current.1 - 1),
             Direction::Right => (current.0 + 1, current.1),
             Direction::Down => (current.0, current.1 + 1),
-        }
+        };
     }
 
-    println!("Part 1: {}", infection_count);
+    println!("Part 2: {}", infection_count);
 }
