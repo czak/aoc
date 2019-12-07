@@ -27,17 +27,17 @@ pub fn run(mut mem: Vec<i32>, input: Vec<i32>) -> Vec<i32> {
     }
 
     loop {
-        // if mem.len() > ip + 3 {
-        //     println!(
-        //         "{}: {} {} {} {}",
-        //         ip,
-        //         mem[ip],
-        //         mem[ip + 1],
-        //         mem[ip + 2],
-        //         mem[ip + 3]
-        //     );
-        // }
-        //
+        if mem.len() > ip + 3 {
+            println!(
+                "{}: {} {} {} {}",
+                ip,
+                mem[ip],
+                mem[ip + 1],
+                mem[ip + 2],
+                mem[ip + 3]
+            );
+        }
+
         let (m1, m2, m3, op) = parse_opcode(mem[ip]);
 
         match op {
@@ -59,6 +59,7 @@ pub fn run(mut mem: Vec<i32>, input: Vec<i32>) -> Vec<i32> {
             }
             4 => {
                 output.push(arg(&mem, ip + 1, m1));
+                dbg!(arg(&mem, ip + 1, m1));
                 ip += 2;
             }
             5 => {
