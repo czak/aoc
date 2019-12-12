@@ -2,12 +2,13 @@ use itertools::Itertools;
 use regex::Regex;
 use std::str::FromStr;
 
+#[allow(dead_code)]
 const EX1: &str = "<x=-1, y=0, z=2>
 <x=2, y=-10, z=-7>
 <x=4, y=-8, z=8>
 <x=3, y=5, z=-1>";
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 struct Moon {
     x: i32,
     y: i32,
@@ -18,9 +19,9 @@ struct Moon {
 }
 
 impl Moon {
-    fn simulate(&mut self, other: &mut Moon) {
-        self.x += 1;
-        other.x -= 1;
+    fn energy(&self) -> i32 {
+        (self.x.abs() + self.y.abs() + self.z.abs())
+            * (self.vx.abs() + self.vy.abs() + self.vz.abs())
     }
 }
 
@@ -40,6 +41,55 @@ impl FromStr for Moon {
     }
 }
 
+type System1D = (i32, i32, i32, i32, i32, i32, i32, i32);
+
+fn components(moons: &[Moon]) -> (System1D, System1D, System1D) {
+    (
+        (
+            moons[0].x,
+            moons[0].vx,
+            moons[1].x,
+            moons[1].vx,
+            moons[2].x,
+            moons[2].vx,
+            moons[3].x,
+            moons[3].vx,
+        ),
+        (
+            moons[0].y,
+            moons[0].vy,
+            moons[1].y,
+            moons[1].vy,
+            moons[2].y,
+            moons[2].vy,
+            moons[3].y,
+            moons[3].vy,
+        ),
+        (
+            moons[0].z,
+            moons[0].vz,
+            moons[1].z,
+            moons[1].vz,
+            moons[2].z,
+            moons[2].vz,
+            moons[3].z,
+            moons[3].vz,
+        ),
+    )
+}
+
+fn gcd(mut n: usize, mut m: usize) -> usize {
+    while n != 0 {
+        if n < m {
+            let t = n;
+            n = m;
+            m = t;
+        }
+        n = n % m;
+    }
+    m
+}
+
 fn main() {
     assert_eq!(
         Ok(Moon {
@@ -48,69 +98,91 @@ fn main() {
             z: 17,
             vx: 0,
             vy: 0,
-            vz: 0
+            vz: 0,
         }),
         "<x=7, y=10, z=17>".parse()
     );
 
-    let mut moons: Vec<Moon> = EX1.lines().map(|l| l.parse().unwrap()).collect();
+    // Part 1
 
-    simulate(&mut moons);
-    simulate(&mut moons);
+    let mut moons: Vec<Moon> = include_str!("../../../in/day12.in")
+        .lines()
+        .map(|l| l.parse().unwrap())
+        .collect();
 
-    // dbg!(moons);
+    for _ in 1..=1000 {
+        simulate(&mut moons);
+    }
+
+    println!(
+        "Part 1: {}",
+        moons.iter().fold(0, |acc, m| acc + m.energy())
+    );
+
+    // Part 2
+
+    let mut moons: Vec<Moon> = include_str!("../../../in/day12.in")
+        .lines()
+        .map(|l| l.parse().unwrap())
+        .collect();
+
+    let (initx, inity, initz) = components(&moons);
+    let (mut foundx, mut foundy, mut foundz) = (0, 0, 0);
+
+    for i in 1..=250000 {
+        simulate(&mut moons);
+
+        let (x, y, z) = components(&moons);
+
+        if foundx == 0 && x == initx {
+            foundx = i;
+        }
+        if foundy == 0 && y == inity {
+            foundy = i;
+        }
+        if foundz == 0 && z == initz {
+            foundz = i;
+        }
+    }
+
+    let lcmxy = foundx * foundy / gcd(foundx, foundy);
+    let lcmxyz = lcmxy * foundz / gcd(lcmxy, foundz);
+
+    println!("Part 2: {}", lcmxyz);
 }
 
 fn simulate(moons: &mut [Moon]) {
+    // apply gravity
     for (a, b) in (0..moons.len()).tuple_combinations() {
-        let Moon {
-            x: x1,
-            y: y1,
-            z: z1,
-            vx: mut vx1,
-            vy: mut vy1,
-            vz: mut vz1,
-        } = moons[a];
-        let Moon {
-            x: x2,
-            y: y2,
-            z: z2,
-            vx: mut vx2,
-            vy: mut vy2,
-            vz: mut vz2,
-        } = moons[b];
-
-        // apply gravity
-        if x1 < x2 {
+        if moons[a].x < moons[b].x {
             moons[a].vx += 1;
-            vx2 -= 1;
-        } else if x1 > x2 {
-            vx1 -= 1;
-            vx2 += 1;
+            moons[b].vx -= 1;
+        } else if moons[a].x > moons[b].x {
+            moons[a].vx -= 1;
+            moons[b].vx += 1;
         }
 
-        if y1 < y2 {
-            vy1 += 1;
-            vy2 -= 1;
-        } else if y1 > y2 {
-            vy1 -= 1;
-            vy2 += 1;
+        if moons[a].y < moons[b].y {
+            moons[a].vy += 1;
+            moons[b].vy -= 1;
+        } else if moons[a].y > moons[b].y {
+            moons[a].vy -= 1;
+            moons[b].vy += 1;
         }
 
-        if z1 < z2 {
-            vz1 += 1;
-            vz2 -= 1;
-        } else if z1 > z2 {
-            vz1 -= 1;
-            vz2 += 1;
+        if moons[a].z < moons[b].z {
+            moons[a].vz += 1;
+            moons[b].vz -= 1;
+        } else if moons[a].z > moons[b].z {
+            moons[a].vz -= 1;
+            moons[b].vz += 1;
         }
+    }
 
-        // apply velocity
-        moons[a].x += moons[a].vx;
-        moons[a].y += moons[a].vy;
-        moons[a].z += moons[a].vz;
-        moons[b].x += moons[a].vx;
-        moons[b].y += moons[a].vy;
-        moons[b].z += moons[a].vz;
+    // apply velocity
+    for moon in moons {
+        moon.x += moon.vx;
+        moon.y += moon.vy;
+        moon.z += moon.vz;
     }
 }
