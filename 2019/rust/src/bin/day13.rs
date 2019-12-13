@@ -9,6 +9,10 @@ fn main() {
 
     ic.mem.resize(10000, 0);
 
+    println!("Part 1: {}", part1(ic.clone()));
+}
+
+fn part1(ic: intcode::Intcode) -> usize {
     let output: Vec<i64> = ic.collect();
     let mut blocks: HashSet<(i64, i64)> = HashSet::new();
 
@@ -24,5 +28,5 @@ fn main() {
         }
     }
 
-    println!("Part 1: {}", blocks.len());
+    blocks.len()
 }
