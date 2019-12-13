@@ -1,10 +1,10 @@
 #[derive(Clone, Default)]
-struct Intcode {
-    mem: Vec<i64>,
-    ip: usize,
-    input: Vec<i64>,
-    inp: usize,
-    rb: usize,
+pub struct Intcode {
+    pub mem: Vec<i64>,
+    pub ip: usize,
+    pub input: Vec<i64>,
+    pub inp: usize,
+    pub rb: usize,
 }
 
 impl Intcode {
