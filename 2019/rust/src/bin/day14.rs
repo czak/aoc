@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use maplit::hashmap;
+use regex::Regex;
 use std::collections::HashMap;
 
 type RecipeMap = HashMap<&'static str, (u32, Vec<(u32, &'static str)>)>;
@@ -37,6 +38,34 @@ fn main() {
     assert_eq!(21, obtain("D", 1, &EX1, &mut hashmap! {}));
     assert_eq!(31, obtain("FUEL", 1, &EX1, &mut hashmap! {}));
     assert_eq!(13312, obtain("FUEL", 1, &EX2, &mut hashmap! {}));
+
+    let recipes = parse(include_str!("../../../in/day14.in"));
+    println!("Part 1: {}", obtain("FUEL", 1, &recipes, &mut hashmap! {}));
+}
+
+fn split(s: &str) -> (u32, &str) {
+    let mut split = s.split(" ");
+    (
+        split.next().unwrap().parse().unwrap(),
+        split.next().unwrap(),
+    )
+}
+
+fn parse(s: &'static str) -> RecipeMap {
+    assert_eq!((7, "TEST"), split("7 TEST"));
+
+    let mut recipes = RecipeMap::new();
+    let re = Regex::new(r"\d+ [A-Z]+").unwrap();
+    for line in s.lines() {
+        let mut chemicals = re
+            .find_iter(line)
+            .map(|m| split(m.as_str()))
+            .collect::<Vec<_>>();
+        let (amount, target) = chemicals.pop().unwrap();
+        recipes.insert(target, (amount, chemicals));
+    }
+
+    recipes
 }
 
 fn obtain(
