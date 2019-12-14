@@ -3,8 +3,8 @@ use maplit::hashmap;
 use regex::Regex;
 use std::collections::HashMap;
 
-type RecipeMap = HashMap<&'static str, (u32, Vec<(u32, &'static str)>)>;
-type LeftoverMap = HashMap<&'static str, u32>;
+type RecipeMap = HashMap<&'static str, (u64, Vec<(u64, &'static str)>)>;
+type LeftoverMap = HashMap<&'static str, u64>;
 
 lazy_static! {
     static ref EX1: RecipeMap = hashmap! {
@@ -43,7 +43,7 @@ fn main() {
     println!("Part 1: {}", obtain("FUEL", 1, &recipes, &mut hashmap! {}));
 }
 
-fn split(s: &str) -> (u32, &str) {
+fn split(s: &str) -> (u64, &str) {
     let mut split = s.split(" ");
     (
         split.next().unwrap().parse().unwrap(),
@@ -70,10 +70,10 @@ fn parse(s: &'static str) -> RecipeMap {
 
 fn obtain(
     chemical: &'static str,
-    mut required_amount: u32,
+    mut required_amount: u64,
     recipes: &RecipeMap,
     leftovers: &mut LeftoverMap,
-) -> u32 {
+) -> u64 {
     if chemical == "ORE" {
         return required_amount;
     }
@@ -94,16 +94,16 @@ fn obtain(
     // find substrates
     let (yield_amount, ingredients) = recipes.get(chemical).unwrap();
 
-    let mut remaining_amount: i32 = required_amount as i32;
+    let mut remaining_amount: i64 = required_amount as i64;
     while remaining_amount > 0 {
         for (ingredient_amount, ingredient_name) in ingredients {
             total += obtain(ingredient_name, *ingredient_amount, recipes, leftovers);
         }
-        remaining_amount -= *yield_amount as i32;
+        remaining_amount -= *yield_amount as i64;
     }
 
     if remaining_amount < 0 {
-        *leftovers.entry(chemical).or_insert(0) += (-remaining_amount) as u32;
+        *leftovers.entry(chemical).or_insert(0) += (-remaining_amount) as u64;
     }
 
     total
