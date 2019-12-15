@@ -94,16 +94,25 @@ fn obtain(
     // find substrates
     let (yield_amount, ingredients) = recipes.get(chemical).unwrap();
 
-    let mut remaining_amount: i64 = required_amount as i64;
-    while remaining_amount > 0 {
-        for (ingredient_amount, ingredient_name) in ingredients {
-            total += obtain(ingredient_name, *ingredient_amount, recipes, leftovers);
-        }
-        remaining_amount -= *yield_amount as i64;
+    let batches = required_amount / yield_amount
+        + if required_amount % yield_amount > 0 {
+            1
+        } else {
+            0
+        };
+
+    for (ingredient_amount, ingredient_name) in ingredients {
+        total += obtain(
+            ingredient_name,
+            batches * *ingredient_amount,
+            recipes,
+            leftovers,
+        );
     }
 
-    if remaining_amount < 0 {
-        *leftovers.entry(chemical).or_insert(0) += (-remaining_amount) as u64;
+    let remaining_amount = batches * yield_amount - required_amount;
+    if batches * yield_amount - required_amount > 0 {
+        *leftovers.entry(chemical).or_insert(0) += remaining_amount;
     }
 
     total
