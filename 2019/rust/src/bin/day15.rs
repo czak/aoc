@@ -1,13 +1,16 @@
-// #![allow(unused_imports)]
+#![allow(unused_imports)]
 use aoc2019::intcode_redux as intcode;
 use maplit::{hashmap, hashset};
 use pathfinding::directed::dijkstra::dijkstra;
 use std::collections::{HashMap, HashSet};
 
+#[allow(dead_code)]
+#[derive(PartialEq)]
 enum Tile {
     Wall,
     Open,
     Oxygen,
+    Path,
 }
 
 #[derive(Copy, Clone)]
@@ -73,7 +76,21 @@ fn main() {
     let mut map: HashMap<Pos, Tile> = hashmap!();
     discover(Pos { x: 0, y: 0 }, &mut ic, &mut map);
 
+    let (_path, len) = dijkstra(
+        &Pos { x: 0, y: 0 },
+        |p| successors(p, &map),
+        |p| map.get(p).map_or(false, |tile| *tile == Tile::Oxygen),
+    )
+    .unwrap();
+
+    // DEBUG: Draw path on map
+    for pos in _path {
+        map.insert(pos, Tile::Path);
+    }
+
     draw(&map);
+
+    println!("Part 1: {}", len);
 }
 
 #[allow(dead_code)]
@@ -90,8 +107,9 @@ fn draw(map: &HashMap<Pos, Tile>) {
             } else {
                 match map.get(&Pos { x, y }) {
                     Some(Tile::Wall) => print!("#"),
-                    Some(Tile::Open) => print!("."),
+                    Some(Tile::Open) => print!(" "),
                     Some(Tile::Oxygen) => print!("$"),
+                    Some(Tile::Path) => print!("."),
                     _ => print!(" "),
                 }
             }
@@ -124,4 +142,15 @@ fn discover(pos: Pos, ic: &mut intcode::Intcode, map: &mut HashMap<Pos, Tile>) {
             }
         }
     }
+}
+
+fn successors(pos: &Pos, map: &HashMap<Pos, Tile>) -> Vec<(Pos, usize)> {
+    let mut v = vec![];
+    for &dir in &[Dir::North, Dir::South, Dir::West, Dir::East] {
+        let next_pos = pos.to(dir);
+        if let Some(Tile::Open) | Some(Tile::Oxygen) = map.get(&next_pos) {
+            v.push((next_pos, 1));
+        }
+    }
+    v
 }
