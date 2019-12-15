@@ -39,8 +39,37 @@ fn main() {
     assert_eq!(31, obtain("FUEL", 1, &EX1, &mut hashmap! {}));
     assert_eq!(13312, obtain("FUEL", 1, &EX2, &mut hashmap! {}));
 
+    assert_eq!(82892753, find_max(&EX2));
+
     let recipes = parse(include_str!("../../../in/day14.in"));
+
     println!("Part 1: {}", obtain("FUEL", 1, &recipes, &mut hashmap! {}));
+    println!("Part 2: {}", find_max(&recipes));
+}
+
+fn find_max(recipes: &RecipeMap) -> u64 {
+    let min = std::iter::successors(Some(1u64), |n| n.checked_mul(2))
+        .take_while(|fuel| fuel_cost(*fuel, recipes) <= 1000000000000u64)
+        .max()
+        .unwrap();
+
+    let mut range = (min, min * 2);
+
+    while range.1 - range.0 > 1 {
+        let current = range.0 + (range.1 - range.0) / 2;
+        let res = fuel_cost(current, &recipes);
+        if res > 1000000000000u64 {
+            range.1 = current;
+        } else {
+            range.0 = current;
+        }
+    }
+
+    range.0
+}
+
+fn fuel_cost(amount: u64, recipes: &RecipeMap) -> u64 {
+    obtain("FUEL", amount, &recipes, &mut hashmap! {})
 }
 
 fn split(s: &str) -> (u64, &str) {
