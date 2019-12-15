@@ -84,13 +84,41 @@ fn main() {
     .unwrap();
 
     // DEBUG: Draw path on map
-    for pos in _path {
-        map.insert(pos, Tile::Path);
-    }
-
-    draw(&map);
+    // for &pos in &_path {
+    //     map.insert(pos, Tile::Path);
+    // }
+    //
+    // draw(&map);
 
     println!("Part 1: {}", len);
+
+    let source: Pos = *_path.last().unwrap(); // oxygen source
+    let mut filled = hashset!();
+    let mut longest = 0;
+    fill(&map, &mut filled, source, 0, &mut longest);
+
+    println!("Part 2: {}", longest);
+}
+
+fn fill(
+    map: &HashMap<Pos, Tile>,
+    filled: &mut HashSet<Pos>,
+    pos: Pos,
+    current: u32,
+    longest: &mut u32,
+) {
+    if filled.contains(&pos) {
+        return;
+    }
+    filled.insert(pos);
+
+    if current > *longest {
+        *longest = current;
+    }
+
+    for next_pos in successors_open(&pos, &map) {
+        fill(map, filled, next_pos, current + 1, longest);
+    }
 }
 
 #[allow(dead_code)]
@@ -150,6 +178,17 @@ fn successors(pos: &Pos, map: &HashMap<Pos, Tile>) -> Vec<(Pos, usize)> {
         let next_pos = pos.to(dir);
         if let Some(Tile::Open) | Some(Tile::Oxygen) = map.get(&next_pos) {
             v.push((next_pos, 1));
+        }
+    }
+    v
+}
+
+fn successors_open(pos: &Pos, map: &HashMap<Pos, Tile>) -> Vec<Pos> {
+    let mut v = vec![];
+    for &dir in &[Dir::North, Dir::South, Dir::West, Dir::East] {
+        let next_pos = pos.to(dir);
+        if let Some(Tile::Open) = map.get(&next_pos) {
+            v.push(next_pos);
         }
     }
     v
