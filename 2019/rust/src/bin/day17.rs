@@ -55,6 +55,14 @@ impl Dir {
             Dir::Right => Dir::Up,
         }
     }
+
+    fn after(self, step: Step) -> Self {
+        match step {
+            Step::Forward => self,
+            Step::TurnLeft => self.turn_left(),
+            Step::TurnRight => self.turn_right(),
+        }
+    }
 }
 
 impl From<char> for Dir {
@@ -67,6 +75,13 @@ impl From<char> for Dir {
             _ => panic!("Unknown dir"),
         }
     }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum Step {
+    Forward,
+    TurnLeft,
+    TurnRight,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -91,23 +106,61 @@ struct RobotNavigator {
     dir: Dir,
 }
 
+impl RobotNavigator {
+    fn step(&mut self, step: Step) {
+        match step {
+            Step::Forward => {
+                self.pos = self.pos.to(self.dir);
+            }
+            Step::TurnLeft | Step::TurnRight => {
+                self.dir = self.dir.after(step);
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    fn draw(&mut self) {
+        let way = self.map(|(pos, steps)| (pos, steps[0])).collect::<Vec<_>>();
+        let mut dist = 0;
+        for (pos, step) in &way {
+            if *step == Step::Forward {
+                dist += 1;
+            } else {
+                if dist > 0 {
+                    println!("({:2},{:2}), {}", pos.x, pos.y, dist);
+                    dist = 0;
+                }
+                println!(
+                    "({:2},{:2}), {}",
+                    pos.x,
+                    pos.y,
+                    if *step == Step::TurnLeft { 'L' } else { 'R' }
+                );
+            }
+        }
+        if dist > 0 {
+            println!(
+                "({:2},{:2}), {:?}",
+                way[way.len() - 1].0.x,
+                way[way.len() - 1].0.y,
+                dist
+            );
+        }
+    }
+}
+
 impl Iterator for RobotNavigator {
-    type Item = (Pos, Vec<(Dir, Pos)>);
+    type Item = (Pos, Vec<Step>);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let mut vec = vec![
-            (self.dir, self.pos.to(self.dir)),
-            (self.dir.turn_left(), self.pos.to(self.dir.turn_left())),
-            (self.dir.turn_right(), self.pos.to(self.dir.turn_right())),
-        ];
-        vec.retain(|(_, pos)| self.path.contains(pos));
+        let mut vec = vec![Step::Forward, Step::TurnLeft, Step::TurnRight];
+        vec.retain(|&step| self.path.contains(&self.pos.to(self.dir.after(step))));
 
         if vec.is_empty() {
             None
         } else {
             let pos = self.pos;
-            self.dir = vec[0].0;
-            self.pos = vec[0].1;
+            self.step(vec[0]); // pick first possible direction, forward preferred
             Some((pos, vec))
         }
     }
@@ -124,12 +177,32 @@ fn main() {
     let (path, robot) = parse(&s);
 
     println!("Part 1: {}", intersections(&path, robot));
+    assert_eq!(8408, intersections(&path, robot));
+
+    // part 2
+
+    // robot.navigate(&path).draw();
+
+    let mut ic = intcode::Intcode {
+        mem: intcode::parse(include_str!("../../../in/day17.in")),
+        input: include_str!("../../../in/day17-drawing.txt")
+            .chars()
+            .map(|c| c as i64)
+            .collect(),
+        ..Default::default()
+    };
+    ic.mem[0] = 2;
+    ic.mem.resize(5000, 0);
+
+    let res = ic.last().unwrap();
+    println!("Part 2: {}", res);
+    assert_eq!(1168948, res);
 }
 
 fn intersections(path: &HashSet<Pos>, robot: Robot) -> i32 {
     let set = robot
         .navigate(path)
-        .filter(|(_, directions)| directions.len() > 1)
+        .filter(|(_, steps)| steps.len() == 3)
         .map(|(pos, _)| pos)
         .collect::<HashSet<Pos>>();
 
