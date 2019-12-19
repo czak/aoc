@@ -69,7 +69,7 @@ fn main() {
     while tunnel.keys.len() > 0 {
         let reachable = reachable_keys(pos, &tunnel);
         // TODO: if multiple, split
-        let idx = stupid_random() % reachable.len();
+        let idx = 0;
         let key = reachable[idx];
         total += collect(pos, key, &mut tunnel);
         pos = key;
