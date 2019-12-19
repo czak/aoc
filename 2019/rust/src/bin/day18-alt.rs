@@ -8,6 +8,32 @@ const EX1: &str = "
 #b.A.@.a#
 #########";
 
+// 86 steps (keys: a, b, c, d, e, f)
+const EX2: &str = "
+########################
+#f.D.E.e.C.b.A.@.a.B.c.#
+######################.#
+#d.....................#
+########################";
+
+// 132 steps
+const EX3: &str = "########################
+#...............b.C.D.f#
+#.######################
+#.....@.a.B.c.d.A.e.F.g#
+########################";
+
+// 136 steps
+const EX4: &str = "#################
+#i.G..c...e..H.p#
+########.########
+#j.A..b...f..D.o#
+########@########
+#k.E..a...g..B.n#
+########.########
+#l.F..d...h..C.m#
+#################";
+
 type Pos = (usize, usize);
 
 #[derive(Debug)]
@@ -20,24 +46,50 @@ struct Tunnel {
 struct Step(Pos, usize, Set<Step>);
 
 fn main() {
-    let (tunnel, pos) = parse(EX1);
-    let res = traverse(pos, &tunnel, Set::new());
+    let (tunnel, pos) = parse(include_str!("../../../in/day18.in"));
+    let res = traverse(pos, &tunnel, Set::new(), 0);
 
-    println!("{:?}", res);
+    draw(&res, 0);
+    println!("Part 1: {}", minimize(&res));
 }
 
-fn traverse(origin: Pos, tunnel: &Tunnel, collected: Set<Pos>) -> Set<Step> {
-    println!("traverse(origin: {:?}, collected: {:?})", origin, collected);
-    println!(
-        " - reachable: {:?}",
-        reachable_keys(origin, tunnel, &collected)
-    );
+fn minimize(steps: &Set<Step>) -> usize {
+    if steps.is_empty() {
+        return 0;
+    }
+
+    steps
+        .iter()
+        .map(|Step(_, cost, next)| cost + minimize(next))
+        .min()
+        .unwrap()
+}
+
+fn draw(steps: &Set<Step>, level: usize) {
+    for Step(pos, cost, next) in steps {
+        for _ in 0..level {
+            print!("  ");
+        }
+        println!("{:?} - {}", pos, cost);
+        draw(next, level + 1);
+    }
+}
+
+fn traverse(origin: Pos, tunnel: &Tunnel, collected: Set<Pos>, level: usize) -> Set<Step> {
+    // DEBUG
+    if level < 7 {
+        println!("traverse(origin: {:?}, collected: {:?})", origin, collected);
+        println!(
+            " - reachable: {:?}",
+            reachable_keys(origin, tunnel, &collected)
+        );
+    }
 
     let mut res = Set::new();
     for (key_pos, cost) in reachable_keys(origin, tunnel, &collected) {
         let mut collected = collected.clone();
         collected.insert(key_pos);
-        let next = traverse(key_pos, tunnel, collected);
+        let next = traverse(key_pos, tunnel, collected, level + 1);
         res.insert(Step(key_pos, cost, next));
     }
     res
