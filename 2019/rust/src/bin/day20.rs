@@ -12,6 +12,9 @@ fn main() {
 
     let (start, end, graph) = parse(EX2);
     assert_eq!(58, find_path(start, end, &graph));
+
+    let (start, end, graph) = parse(include_str!("../../../in/day20.in"));
+    println!("Part 1: {}", find_path(start, end, &graph));
 }
 
 fn find_path(start: Pos, end: Pos, graph: &HashMap<Pos, Vec<Pos>>) -> usize {
