@@ -1,12 +1,31 @@
+use pathfinding::directed::dijkstra::dijkstra;
 use std::collections::HashMap;
 
 type Pos = (usize, usize);
 
 const EX1: &str = include_str!("../../../in/day20.ex1");
+const EX2: &str = include_str!("../../../in/day20.ex2");
 
 fn main() {
-    let graph = parse(EX1);
-    dbg!(graph.get(&(2, 8)));
+    let (start, end, graph) = parse(EX1);
+    assert_eq!(23, find_path(start, end, &graph));
+
+    let (start, end, graph) = parse(EX2);
+    assert_eq!(58, find_path(start, end, &graph));
+}
+
+fn find_path(start: Pos, end: Pos, graph: &HashMap<Pos, Vec<Pos>>) -> usize {
+    dijkstra(
+        &start,
+        |pos| {
+            graph
+                .get(pos)
+                .map_or(vec![], |v| v.iter().copied().map(|p| (p, 1)).collect())
+        },
+        |pos| *pos == end,
+    )
+    .unwrap()
+    .1
 }
 
 #[derive(Debug)]
@@ -21,7 +40,7 @@ enum Edge {
     InnerWest,
 }
 
-fn parse(s: &str) -> HashMap<Pos, Vec<Pos>> {
+fn parse(s: &str) -> (Pos, Pos, HashMap<Pos, Vec<Pos>>) {
     let map: Vec<Vec<char>> = s.lines().map(|line| line.chars().collect()).collect();
 
     let width = map[0].len() - 4;
@@ -105,7 +124,11 @@ fn parse(s: &str) -> HashMap<Pos, Vec<Pos>> {
         graph.entry(b).or_insert(vec![]).push(a);
     }
 
-    graph
+    (
+        portals.get("AA").unwrap()[0],
+        portals.get("ZZ").unwrap()[0],
+        graph,
+    )
 }
 
 fn label_for(edge: Edge, x: usize, y: usize) -> (Pos, Pos) {
