@@ -6,7 +6,7 @@ const EX1: &str = include_str!("../../../in/day20.ex1");
 
 fn main() {
     let graph = parse(EX1);
-    // dbg!(graph);
+    dbg!(graph.get(&(2, 8)));
 }
 
 #[derive(Debug)]
@@ -27,8 +27,6 @@ fn parse(s: &str) -> HashMap<Pos, Vec<Pos>> {
     let width = map[0].len() - 4;
     let height = map.len() - 4;
     let thickness = (2..).take_while(|&i| map[i][i] != ' ').last().unwrap() - 1;
-
-    dbg!(2 + height - thickness);
 
     let edge = |x: usize, y: usize| {
         use Edge::*;
@@ -59,11 +57,10 @@ fn parse(s: &str) -> HashMap<Pos, Vec<Pos>> {
             }
             _ => None,
         }
-        // x == 2 || x == 2 + width - 1 || y == 2 || y == 2 + height - 1 ||
-        //     (x == 2 + thickness - 1 && y >= 2 + thickness && y <=
     };
 
     let mut graph: HashMap<Pos, Vec<Pos>> = HashMap::new();
+    let mut portals: HashMap<String, Vec<Pos>> = HashMap::new();
 
     for y in 2..height + 2 {
         for x in 2..width + 2 {
@@ -86,11 +83,38 @@ fn parse(s: &str) -> HashMap<Pos, Vec<Pos>> {
 
                 // is it a portal?
                 if let Some(edge) = edge(x, y) {
-                    println!("portal {:?} at {},{}", edge, y + 1, x + 1);
+                    // read label
+                    let ((ax, ay), (bx, by)) = label_for(edge, x, y);
+                    let label: String = [map[ay][ax], map[by][bx]].iter().collect();
+                    portals.entry(label).or_insert(vec![]).push((x, y));
                 }
             }
         }
     }
 
+    // add portals to graph
+    for (label, positions) in &portals {
+        if label == "AA" || label == "ZZ" {
+            continue;
+        }
+
+        // there are 2 elements, connect both ways
+        let a = positions[0];
+        let b = positions[1];
+        graph.entry(a).or_insert(vec![]).push(b);
+        graph.entry(b).or_insert(vec![]).push(a);
+    }
+
     graph
+}
+
+fn label_for(edge: Edge, x: usize, y: usize) -> (Pos, Pos) {
+    use Edge::*;
+
+    match edge {
+        OuterNorth | InnerSouth => ((x, y - 2), (x, y - 1)),
+        OuterEast | InnerWest => ((x + 1, y), (x + 2, y)),
+        OuterSouth | InnerNorth => ((x, y + 1), (x, y + 2)),
+        OuterWest | InnerEast => ((x - 2, y), (x - 1, y)),
+    }
 }
