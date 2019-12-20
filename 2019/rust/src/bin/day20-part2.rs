@@ -17,14 +17,14 @@ fn main() {
     // 2 levels down, 1 level up
     assert_eq!(16, find_path((13, 8, 0), (37, 13, 1), &graph, &portals));
 
-    // // example
-    // assert_eq!(396, find_path((ax, ay, 0), (bx, by, 0), &graph, &portals));
+    // example
+    assert_eq!(396, find_path((ax, ay, 0), (bx, by, 0), &graph, &portals));
 
-    // let ((ax, ay), (bx, by), graph, portals) = parse(include_str!("../../../in/day20.in"));
-    // println!(
-    //     "Part 2: {}",
-    //     find_path((ax, ay, 0), (bx, by, 0), &graph, &portals)
-    // );
+    let ((ax, ay), (bx, by), graph, portals) = parse(include_str!("../../../in/day20.in"));
+    println!(
+        "Part 2: {}",
+        find_path((ax, ay, 0), (bx, by, 0), &graph, &portals)
+    );
 }
 
 fn find_path(
@@ -46,16 +46,11 @@ fn find_path(
             use Edge::*;
             match edge {
                 InnerNorth | InnerEast | InnerSouth | InnerWest => {
-                    // println!("p from {:?} to {:?}", (x, y, level), (dx, dy, level + 1));
-                    // limit depth
-                    if level < 20 {
-                        v.push(((dx, dy, level + 1), 1));
-                    }
+                    v.push(((dx, dy, level + 1), 1));
                 }
                 OuterNorth | OuterEast | OuterSouth | OuterWest => {
-                    // println!("p from {:?} to {:?}", (x, y, level), (dx, dy, level + 1));
-                    // can't move higher than level 0
-                    if level > 1 {
+                    // can't move below level 0
+                    if level > 0 {
                         v.push(((dx, dy, level - 1), 1));
                     }
                 }
