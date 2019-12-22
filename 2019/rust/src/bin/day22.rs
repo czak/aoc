@@ -163,19 +163,9 @@ fn reindex(i: i32, size: i32, shuffle: Shuffle) -> i32 {
         DealIntoNewStack => (size - 1 - i) % size,
         Cut(n) => {
             let split = if n >= 0 { n } else { size + n };
-            (i + split) % size
+            (i + size - split) % size
         }
-        DealWithIncrement(n) => {
-            if n == size - 1 {
-                if i == 0 {
-                    0
-                } else {
-                    size - i
-                }
-            } else {
-                ((size - n) * i) % size
-            }
-        }
+        DealWithIncrement(n) => (n * i) % size,
     }
 }
 
@@ -198,33 +188,26 @@ fn test_reindexing() {
         )
     );
 
-    assert_eq!(4, reindex(1, 10, Shuffle::Cut(3)));
-    assert_eq!(1, reindex(8, 10, Shuffle::Cut(3)));
-    assert_eq!(8, reindex(2, 10, Shuffle::Cut(-4)));
+    // 0 1 2 3 4 5 6 7 8 9
+    // 3 4 5 6 7 8 9 0 1 2
+    assert_eq!(8, reindex(1, 10, Shuffle::Cut(3)));
 
-    assert_eq!(7, reindex(1, 10, Shuffle::DealWithIncrement(3)));
-    assert_eq!(2, reindex(4, 10, Shuffle::DealWithIncrement(7)));
+    // 0 1 2 3 4 5 6 7 8 9
+    // 6 7 8 9 0 1 2 3 4 5
+    assert_eq!(5, reindex(1, 10, Shuffle::Cut(-4)));
+    assert_eq!(2, reindex(8, 10, Shuffle::Cut(-4)));
 
-    // the weird one
-    assert_eq!(2, reindex(8, 10, Shuffle::DealWithIncrement(9)));
+    // 0 1 2 3 4 5 6 7 8 9
+    // 0 7 4 1 8 5 2 9 6 3
+    assert_eq!(3, reindex(1, 10, Shuffle::DealWithIncrement(3)));
+
+    // 0 1 2 3 4 5 6 7 8 9
+    // 0 9 8 7 6 5 4 3 2 1
+    assert_eq!(9, reindex(1, 10, Shuffle::DealWithIncrement(9)));
 
     let seq = parse(EX1);
-    assert_eq!(9, reindex_seq(3, 10, &seq));
-    assert_eq!(7, reindex_seq(9, 10, &seq));
+    assert_eq!(1, reindex_seq(3, 10, &seq));
 
-    // NOT WORKING
-
-    // let seq = parse(EX2);
-    // assert_eq!(4, reindex_seq(3, 10, &seq));
-    // assert_eq!(6, reindex_seq(9, 10, &seq));
-
-    // OLD
-
-    // let seq = parse(EX2);
-    // let deck: Vec<i32> = (0..).take(10).collect();
-    // assert_eq!(vec![3, 0, 7, 4, 1, 8, 5, 2, 9, 6], shuffle(deck, &seq));
-    //
-    // let seq = parse(EX3);
-    // let deck: Vec<i32> = (0..).take(10).collect();
-    // assert_eq!(vec![6, 3, 0, 7, 4, 1, 8, 5, 2, 9], shuffle(deck, &seq));
+    let seq = parse(EX2);
+    assert_eq!(0, reindex_seq(3, 10, &seq));
 }
