@@ -1,11 +1,12 @@
 #![allow(dead_code)]
+use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy)]
 enum Shuffle {
     DealIntoNewStack,
-    Cut(i32),
-    DealWithIncrement(i32),
+    Cut(i128),
+    DealWithIncrement(i128),
 }
 
 impl FromStr for Shuffle {
@@ -15,7 +16,7 @@ impl FromStr for Shuffle {
         if s == "deal into new stack" {
             return Ok(Shuffle::DealIntoNewStack);
         }
-        let n: i32 = s.rsplit(' ').next().unwrap().parse().unwrap();
+        let n: i128 = s.rsplit(' ').next().unwrap().parse().unwrap();
         if s.starts_with("cut") {
             Ok(Shuffle::Cut(n))
         } else {
@@ -30,6 +31,23 @@ fn main() {
     let seq = parse(include_str!("../../../in/day22.in"));
     println!("Part 1: {}", reindex_seq(2019, 10007, &seq));
     assert_eq!(2519, reindex_seq(2019, 10007, &seq));
+
+    let mut seen: HashSet<i128> = HashSet::new();
+    seen.insert(2020);
+
+    // Part 2
+    let mut n = 2020;
+    let mut prev = 2020;
+    for _ in 0..1000000 {
+        n = revindex_seq(n, 119315717514047, &seq);
+        // println!("{}, {}", n, n - prev);
+
+        prev = n;
+        if seen.contains(&n) {
+            println!("Seen!");
+        }
+        seen.insert(n);
+    }
 }
 
 fn parse(s: &str) -> Vec<Shuffle> {
@@ -65,7 +83,7 @@ deal with increment 9
 deal with increment 3
 cut -1";
 
-fn reindex(i: i32, size: i32, shuffle: Shuffle) -> i32 {
+fn reindex(i: i128, size: i128, shuffle: Shuffle) -> i128 {
     use Shuffle::*;
     match shuffle {
         DealIntoNewStack => (size - 1 - i) % size,
@@ -117,7 +135,7 @@ fn test_reindexing() {
     assert_eq!(0, reindex_seq(3, 10, &seq));
 }
 
-fn revindex(i: i32, size: i32, shuffle: Shuffle) -> i32 {
+fn revindex(i: i128, size: i128, shuffle: Shuffle) -> i128 {
     use Shuffle::*;
     match shuffle {
         DealIntoNewStack => (size - 1 - i) % size,
@@ -180,14 +198,14 @@ fn test_revindex_seq() {
     revindex_seq(1, 10, &seq);
 }
 
-fn reindex_seq(mut i: i32, size: i32, seq: &[Shuffle]) -> i32 {
+fn reindex_seq(mut i: i128, size: i128, seq: &[Shuffle]) -> i128 {
     for &shuffle in seq {
         i = reindex(i, size, shuffle);
     }
     i
 }
 
-fn revindex_seq(mut i: i32, size: i32, seq: &[Shuffle]) -> i32 {
+fn revindex_seq(mut i: i128, size: i128, seq: &[Shuffle]) -> i128 {
     for &shuffle in seq.iter().rev() {
         i = revindex(i, size, shuffle);
     }
