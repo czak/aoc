@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum Shuffle {
     DealIntoNewStack,
     Cut(i32),
-    DealWithIncrement(usize),
+    DealWithIncrement(i32),
 }
 
 impl FromStr for Shuffle {
@@ -19,7 +19,7 @@ impl FromStr for Shuffle {
         if s.starts_with("cut") {
             Ok(Shuffle::Cut(n))
         } else {
-            Ok(Shuffle::DealWithIncrement(n as usize))
+            Ok(Shuffle::DealWithIncrement(n))
         }
     }
 }
@@ -27,39 +27,38 @@ impl FromStr for Shuffle {
 fn main() {
     // Part 1
 
-    let deck: Vec<u32> = (0..).take(10007).collect();
+    let deck: Vec<i32> = (0..).take(10007).collect();
     let seq = parse(include_str!("../../../in/day22.in"));
     let res = shuffle(deck, &seq);
     println!("Part 1: {:?}", res.iter().position(|&n| n == 2019).unwrap());
 
     // // Part 2
     //
-    // let mut deck: Vec<u32> = (0..).take(10).collect();
+    // let mut deck: Vec<i32> = (0..).take(10).collect();
     // let seq = parse(include_str!("../../../in/day22.in"));
     // deck = shuffle(deck, &seq);
 }
 
-fn shuffle(mut deck: Vec<u32>, seq: &Vec<Shuffle>) -> Vec<u32> {
+fn shuffle(mut deck: Vec<i32>, seq: &Vec<Shuffle>) -> Vec<i32> {
     use Shuffle::*;
     for shuffle in seq {
         deck = match shuffle {
             &DealIntoNewStack => deck.into_iter().rev().collect(),
             &Cut(n) => {
-                let split: usize = if n >= 0 {
-                    n as usize
-                } else {
-                    (deck.len() as i32 + n) as usize
-                };
-
+                let split = if n >= 0 { n } else { deck.len() as i32 + n };
                 deck.iter()
-                    .skip(split)
-                    .chain(deck.iter().take(split))
+                    .skip(split as usize)
+                    .chain(deck.iter().take(split as usize))
                     .copied()
                     .collect()
             }
             &DealWithIncrement(n) => {
-                let indexes = (0..).take(deck.len()).cycle().step_by(n).take(deck.len());
-                let mut deck: Vec<u32> = deck.into_iter().rev().collect();
+                let indexes = (0..)
+                    .take(deck.len())
+                    .cycle()
+                    .step_by(n as usize)
+                    .take(deck.len());
+                let mut deck: Vec<i32> = deck.into_iter().rev().collect();
                 let mut res = vec![];
                 res.resize(deck.len(), 0);
                 for i in indexes {
@@ -108,25 +107,25 @@ cut -1";
 
 #[test]
 fn test_shuffling() {
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(
         vec![9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
         shuffle(deck, &vec![Shuffle::DealIntoNewStack])
     );
 
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(
         vec![3, 4, 5, 6, 7, 8, 9, 0, 1, 2],
         shuffle(deck, &vec![Shuffle::Cut(3)])
     );
 
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(
         vec![6, 7, 8, 9, 0, 1, 2, 3, 4, 5],
         shuffle(deck, &vec![Shuffle::Cut(-4)])
     );
 
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(
         vec![0, 7, 4, 1, 8, 5, 2, 9, 6, 3],
         shuffle(deck, &vec![Shuffle::DealWithIncrement(3)])
@@ -146,14 +145,86 @@ fn test_shuffling() {
     );
 
     let seq = parse(EX1);
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(vec![0, 3, 6, 9, 2, 5, 8, 1, 4, 7], shuffle(deck, &seq));
 
     let seq = parse(EX2);
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(vec![3, 0, 7, 4, 1, 8, 5, 2, 9, 6], shuffle(deck, &seq));
 
     let seq = parse(EX3);
-    let deck: Vec<u32> = (0..).take(10).collect();
+    let deck: Vec<i32> = (0..).take(10).collect();
     assert_eq!(vec![6, 3, 0, 7, 4, 1, 8, 5, 2, 9], shuffle(deck, &seq));
+}
+
+fn reindex(i: i32, size: i32, shuffle: Shuffle) -> i32 {
+    use Shuffle::*;
+    match shuffle {
+        DealIntoNewStack => (size - 1 - i) % size,
+        Cut(n) => {
+            let split = if n >= 0 { n } else { size + n };
+            (i + split) % size
+        }
+        DealWithIncrement(n) => {
+            if n == size - 1 {
+                if i == 0 {
+                    0
+                } else {
+                    size - i
+                }
+            } else {
+                ((size - n) * i) % size
+            }
+        }
+    }
+}
+
+fn reindex_seq(mut i: i32, size: i32, seq: &[Shuffle]) -> i32 {
+    for &shuffle in seq {
+        i = reindex(i, size, shuffle);
+    }
+    i
+}
+
+#[test]
+fn test_reindexing() {
+    assert_eq!(6, reindex(3, 10, Shuffle::DealIntoNewStack));
+    assert_eq!(
+        3,
+        reindex(
+            reindex(3, 10, Shuffle::DealIntoNewStack),
+            10,
+            Shuffle::DealIntoNewStack
+        )
+    );
+
+    assert_eq!(4, reindex(1, 10, Shuffle::Cut(3)));
+    assert_eq!(1, reindex(8, 10, Shuffle::Cut(3)));
+    assert_eq!(8, reindex(2, 10, Shuffle::Cut(-4)));
+
+    assert_eq!(7, reindex(1, 10, Shuffle::DealWithIncrement(3)));
+    assert_eq!(2, reindex(4, 10, Shuffle::DealWithIncrement(7)));
+
+    // the weird one
+    assert_eq!(2, reindex(8, 10, Shuffle::DealWithIncrement(9)));
+
+    let seq = parse(EX1);
+    assert_eq!(9, reindex_seq(3, 10, &seq));
+    assert_eq!(7, reindex_seq(9, 10, &seq));
+
+    // NOT WORKING
+
+    // let seq = parse(EX2);
+    // assert_eq!(4, reindex_seq(3, 10, &seq));
+    // assert_eq!(6, reindex_seq(9, 10, &seq));
+
+    // OLD
+
+    // let seq = parse(EX2);
+    // let deck: Vec<i32> = (0..).take(10).collect();
+    // assert_eq!(vec![3, 0, 7, 4, 1, 8, 5, 2, 9, 6], shuffle(deck, &seq));
+    //
+    // let seq = parse(EX3);
+    // let deck: Vec<i32> = (0..).take(10).collect();
+    // assert_eq!(vec![6, 3, 0, 7, 4, 1, 8, 5, 2, 9], shuffle(deck, &seq));
 }
