@@ -220,7 +220,15 @@ fn revindex(i: i32, size: i32, shuffle: Shuffle) -> i32 {
             let split = if n >= 0 { n } else { size + n };
             (i + split) % size
         }
-        DealWithIncrement(n) => (n * i) % size,
+        DealWithIncrement(n) => {
+            if n = size - 1 {
+                if i == 0 {
+                    0
+                } else {
+                }
+            }
+            ((size - n) * i) % size,
+        }
     }
 }
 
@@ -237,13 +245,14 @@ fn test_revindexing() {
     assert_eq!(1, revindex(5, 10, Shuffle::Cut(-4)));
     assert_eq!(8, revindex(2, 10, Shuffle::Cut(-4)));
 
-    // // 0 1 2 3 4 5 6 7 8 9
-    // // 0 7 4 1 8 5 2 9 6 3
-    // assert_eq!(3, reindex(1, 10, Shuffle::DealWithIncrement(3)));
+    // 0 1  2  3  4   5 6  7  8  9
+    // 0 7 14 21 28 35 42 49 56 63
+    assert_eq!(3, reindex(1, 10, Shuffle::DealWithIncrement(3)));
+    assert_eq!(1, revindex(3, 10, Shuffle::DealWithIncrement(3)));
 
-    // // 0 1 2 3 4 5 6 7 8 9
-    // // 0 9 8 7 6 5 4 3 2 1
-    // assert_eq!(9, reindex(1, 10, Shuffle::DealWithIncrement(9)));
+    // 0 1 2 3 4 5 6 7 8 9
+    // 0 9 8 7 6 5 4 3 2 1
+    assert_eq!(1, revindex(9, 10, Shuffle::DealWithIncrement(9)));
 
     // let seq = parse(EX1);
     // assert_eq!(1, reindex_seq(3, 10, &seq));
