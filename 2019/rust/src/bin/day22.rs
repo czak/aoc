@@ -32,6 +32,9 @@ fn main() {
     let res = shuffle(deck, &seq);
     println!("Part 1: {:?}", res.iter().position(|&n| n == 2019).unwrap());
 
+    println!("Part 1: {}", reindex_seq(2019, 10007, &seq));
+    assert_eq!(2519, reindex_seq(2019, 10007, &seq));
+
     // // Part 2
     //
     // let mut deck: Vec<i32> = (0..).take(10).collect();
@@ -273,21 +276,15 @@ fn test_revindex_seq() {
 }
 
 fn reindex_seq(mut i: i32, size: i32, seq: &[Shuffle]) -> i32 {
-    print!("REI: {} ", i);
     for &shuffle in seq {
         i = reindex(i, size, shuffle);
-        print!("{} ", i);
     }
-    println!();
     i
 }
 
 fn revindex_seq(mut i: i32, size: i32, seq: &[Shuffle]) -> i32 {
-    print!("REV: {} ", i);
     for &shuffle in seq.iter().rev() {
         i = revindex(i, size, shuffle);
-        print!("{} ", i);
     }
-    println!();
     i
 }
