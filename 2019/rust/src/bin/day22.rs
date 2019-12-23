@@ -32,21 +32,36 @@ fn main() {
     println!("Part 1: {}", reindex_seq(2019, 10007, &seq));
     assert_eq!(2519, reindex_seq(2019, 10007, &seq));
 
-    let mut seen: HashSet<i128> = HashSet::new();
-    seen.insert(2020);
+    let mut dseen: HashSet<i128> = HashSet::new();
+    let mut nseen: HashSet<i128> = HashSet::new();
 
     // Part 2
     let mut n = 2020;
-    let mut prev = 2020;
-    for _ in 0..1000000 {
-        n = revindex_seq(n, 119315717514047, &seq);
-        // println!("{}, {}", n, n - prev);
-
+    let mut prev;
+    for i in 0..100000 {
         prev = n;
-        if seen.contains(&n) {
-            println!("Seen!");
+        n = revindex_seq(n, 119315717514047, &seq);
+
+        // change from prev
+        let diff = if n >= prev {
+            n - prev
+        } else {
+            n - prev + 119315717514047
+        };
+
+        println!("{}, {}", n, diff);
+
+        if nseen.contains(&n) {
+            println!("{}: nseen {}", i, n);
+        } else {
+            nseen.insert(n);
         }
-        seen.insert(n);
+
+        if dseen.contains(&diff) {
+            println!("{}: dseen {}", i, diff);
+        } else {
+            dseen.insert(diff);
+        }
     }
 }
 
@@ -85,14 +100,16 @@ cut -1";
 
 fn reindex(i: i128, size: i128, shuffle: Shuffle) -> i128 {
     use Shuffle::*;
-    match shuffle {
+    let res = match shuffle {
         DealIntoNewStack => (size - 1 - i) % size,
         Cut(n) => {
             let split = if n >= 0 { n } else { size + n };
             (i + size - split) % size
         }
         DealWithIncrement(n) => (n * i) % size,
-    }
+    };
+    println!("{:?}: {}", shuffle, res);
+    res
 }
 
 #[test]
@@ -137,7 +154,7 @@ fn test_reindexing() {
 
 fn revindex(i: i128, size: i128, shuffle: Shuffle) -> i128 {
     use Shuffle::*;
-    match shuffle {
+    let res = match shuffle {
         DealIntoNewStack => (size - 1 - i) % size,
         Cut(n) => {
             let split = if n >= 0 { n } else { size + n };
@@ -154,7 +171,9 @@ fn revindex(i: i128, size: i128, shuffle: Shuffle) -> i128 {
                 ((size - n) * i) % size
             }
         }
-    }
+    };
+    println!("Rev. {:?}: {}", shuffle, res);
+    res
 }
 
 #[test]
@@ -179,6 +198,9 @@ fn test_revindexing() {
     assert_eq!(1, revindex(7, 10, Shuffle::DealWithIncrement(7)));
     assert_eq!(3, revindex(1, 10, Shuffle::DealWithIncrement(7)));
 
+    assert_eq!(2519, reindex(9799, 10007, Shuffle::DealWithIncrement(36)));
+    assert_eq!(9799, revindex(2519, 10007, Shuffle::DealWithIncrement(36)));
+
     // 0 1 2 3 4 5 6 7 8 9
     // 0 9 8 7 6 5 4 3 2 1
     assert_eq!(9, reindex(1, 10, Shuffle::DealWithIncrement(9)));
@@ -192,10 +214,26 @@ fn test_revindexing() {
 }
 
 #[test]
-fn test_revindex_seq() {
-    let seq = parse(EX1);
-    reindex_seq(3, 10, &seq);
-    revindex_seq(1, 10, &seq);
+fn test_reverse() {
+    let seq = parse(include_str!("../../../in/day22.in"));
+
+    // run seq 3 times
+    let n = reindex_seq(2019, 10007, &seq); // = 2519
+    assert_eq!(2519, n);
+    // let n = reindex_seq(n, 10007, &seq); // = 6343
+    // assert_eq!(6343, n);
+    // let n = reindex_seq(n, 10007, &seq); // = 4207
+    // assert_eq!(4207, n);
+    //
+    println!("------------------------ REV ---------------------------");
+
+    // reverse 3 times
+    // let n = revindex_seq(n, 10007, &seq);
+    // assert_eq!(6343, n);
+    // let n = revindex_seq(n, 10007, &seq);
+    // assert_eq!(2519, n);
+    let n = revindex_seq(2519, 10007, &seq);
+    assert_eq!(2019, n);
 }
 
 fn reindex_seq(mut i: i128, size: i128, seq: &[Shuffle]) -> i128 {
