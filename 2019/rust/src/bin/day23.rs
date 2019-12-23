@@ -1,5 +1,5 @@
 #![allow(unused_imports)]
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::sync::mpsc;
 use std::thread;
 use std::time;
@@ -34,13 +34,30 @@ fn main() {
         outputs.push(tx);
     }
 
-    while let Ok((address, x, y)) = rxs.recv() {
-        if address < outputs.len() {
-            outputs[address].send((x, y)).unwrap();
-        } else {
-            if address == 255 {
-                println!("Part 1: {}", y);
-                break;
+    let mut xnat = 0;
+    let mut ynat = 0;
+    let mut sent = HashSet::new();
+
+    loop {
+        match rxs.recv_timeout(std::time::Duration::from_millis(100)) {
+            Ok((address, x, y)) => {
+                if address < outputs.len() {
+                    outputs[address].send((x, y)).unwrap();
+                } else if address == 255 {
+                    // NAT
+                    xnat = x;
+                    ynat = y;
+                }
+            }
+            Err(_) => {
+                println!("Timed out, throttling: ({},{}).", xnat, ynat);
+                outputs[0].send((xnat, ynat)).unwrap();
+                if sent.contains(&ynat) {
+                    println!("Part 2: {}", ynat);
+                    break;
+                } else {
+                    sent.insert(ynat);
+                }
             }
         }
     }
