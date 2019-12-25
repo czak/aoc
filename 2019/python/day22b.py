@@ -8,7 +8,8 @@ def inc(n, c, size):
     return c * n
 
 card = 2019
-size = 10007
+# size = 10007
+size = 119315717514047
 
 SEQUENCE = [
 (66, 0),
@@ -117,8 +118,21 @@ a = 1
 b = 0
 
 for na, nb in SEQUENCE:
-    a *= na
-    b *= na
-    b += nb
+    a = (a * na) % size
+    b = (b * na + nb) % size
 
-print((a * card + b) % size)
+print("Single", a, b)
+
+# repeats
+repeats = 101741582076661
+
+def modpow(x, e, m):
+    y = 1
+    while e > 0:
+        if e % 2 == 0:
+            x = (x * x) % m
+            e = e / 2
+        else:
+            y = (x * y) % m
+            e = e - 1
+    return y
