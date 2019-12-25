@@ -115,6 +115,8 @@ SEQUENCE = [
 (modpow(36, size-2, size), 0),
 ]
 
+card = 2519
+
 a = 1
 b = 0
 
@@ -122,6 +124,60 @@ for na, nb in reversed(SEQUENCE):
     a = (a * na) % size
     b = (b * na + nb) % size
 
-print(a, b)
+print("single:", a, b)
+print((a * card + b) % size)
+print("---")
 
-print((a * 2519 + b) % size)
+###### now repeated
+
+repeats = 11
+
+a = 1
+b = 0
+
+for n in range(repeats):
+    for na, nb in reversed(SEQUENCE):
+        a = (a * na) % size
+        b = (b * na + nb) % size
+
+print("repeated:", a, b)
+print((a * card + b) % size)
+print("---")
+
+####### now repeated via a formula
+
+# f0 = 2519
+# f1 = 
+
+# fn = (((a - 1) * card + b) * a^repeats - b) / a - 1
+
+# single again
+a = 1
+b = 0
+
+for na, nb in reversed(SEQUENCE):
+    a = (a * na) % size
+    b = (b * na + nb) % size
+
+G(0) = 2519
+G(n) = a * G(n-1) + b
+G(n-1) = a * G(n-2) + b
+
+G(n) - G(n-1) = a * G(n-1) - a * G(n-2)
+
+G(n) = (a+1) * G(n-1) - a * G(n-2)
+
+G(n) = 3110 * G(n-1) - 3109 * G(n-2)
+
+#####
+
+2^n * G(0) + (2^n−1)*
+
+(a = 3109, b = 5929)
+G(0) = 2519
+G(1) = 3109 * 2519 + 5929 = 7837500
+G(2) = 3109 * 7837500 + 5929 = 24366793429
+
+
+G(2) = 3109^2 * 2519 + (3109^2 - 1) * 5929 =
+
