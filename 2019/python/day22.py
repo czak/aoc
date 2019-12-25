@@ -1,3 +1,12 @@
+def deal(c, size):
+    return size - 1 - c
+
+def cut(n, c, size):
+    return c + size - n
+
+def inc(n, c, size):
+    return c * n
+
 SEQUENCE = [
 (inc, 66),
 (cut, -2068),
@@ -100,15 +109,6 @@ SEQUENCE = [
 (cut, 7623),
 (inc, 36),
 ]
-
-def deal(c, size):
-    return size - 1 - c
-
-def cut(n, c, size):
-    return c + size - n
-
-def inc(n, c, size):
-    return c * n
 
 card = 2019
 size = 10007
