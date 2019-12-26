@@ -67,9 +67,16 @@ impl Iterator for Intcode {
                     self.ip += 4;
                 }
                 3 => {
-                    self.put(1, self.input[self.inp]);
-                    self.ip += 2;
-                    self.inp += 1;
+                    if self.inp < self.input.len() {
+                        self.put(1, self.input[self.inp]);
+                        self.ip += 2;
+                        self.inp += 1;
+                    } else {
+                        let mut s = String::new();
+                        std::io::stdin().read_line(&mut s).unwrap();
+                        let mut chars: Vec<i64> = s.chars().map(|ch| ch as i64).collect();
+                        self.input.append(&mut chars);
+                    }
                 }
                 4 => {
                     let output = self.get(1);
