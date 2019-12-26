@@ -9,9 +9,9 @@ def modpow(x, e, m):
             e = e - 1
     return y
 
-card = 2519
-size = 10007
-# size = 119315717514047
+card = 2020
+# size = 10007
+size = 119315717514047
 
 SEQUENCE = [
 (modpow(66, size-2, size), 0),
@@ -129,19 +129,19 @@ print("---")
 
 ###### now repeated
 
-repeats = 11
+repeats = 101741582076661
 
-a = 1
-b = 0
-
-for n in range(repeats):
-    for na, nb in reversed(SEQUENCE):
-        a = (a * na) % size
-        b = (b * na + nb) % size
-
-print("repeated:", a, b)
-print((a * card + b) % size)
-print("---")
+# a = 1
+# b = 0
+#
+# for n in range(repeats):
+#     for na, nb in reversed(SEQUENCE):
+#         a = (a * na) % size
+#         b = (b * na + nb) % size
+#
+# print("repeated:", a, b)
+# print((a * card + b) % size)
+# print("---")
 
 ####### now repeated via a formula
 
@@ -158,22 +158,13 @@ for na, nb in reversed(SEQUENCE):
     a = (a * na) % size
     b = (b * na + nb) % size
 
-print("Real exponentiation")
-res = (((a - 1) * card + b) * a ** repeats - b) // (a - 1)
-print(res % size)
-print("---")
+# res = (((a - 1) * card + b) * a ** repeats - b) // (a - 1)
+# print(res % size)
 
-print("with modpow")
 res = (((a - 1) * card + b) * modpow(a, repeats, size) - b) % size
 res *= modpow(a-1, size-2, size)
 print(res % size)
-print("---")
 
-# z = x   / y
-# res = 971 / 3108
-# res * 3108 = 971
-
-# wynik = res / (a - 1)
 
 # res (mod size) = 98 / 3108  (mod size)
 
