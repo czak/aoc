@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main() {
   FILE *f = fopen("../in/day01.in", "r");
@@ -10,8 +11,6 @@ int main() {
   int steps;
 
   while (fscanf(f, "%c%d", &turn, &steps) != EOF) {
-    printf("%c, %d\n", turn, steps);
-
     if (turn == 'R')
       dir = (dir + 1) % 4;
     else if (turn == 'L')
@@ -35,5 +34,5 @@ int main() {
     fseek(f, 2, SEEK_CUR);
   }
 
-  printf("%d, %d\n", x, y);
+  printf("Part 1: %d\n", abs(x) + abs(y));
 }
