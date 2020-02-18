@@ -1,5 +1,5 @@
 %: %.S
-	riscv32-unknown-elf-gcc -march=rv32i -g $^ -o $@ -nostartfiles
+	riscv32-unknown-elf-gcc -march=rv32i -g $^ -o $@
 
 .PHONY: run
 run: $(DAY)

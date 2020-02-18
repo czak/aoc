@@ -1,18 +1,17 @@
+# vim: set sw=4 ts=4:
 .section .text
-.globl _start
-_start:
-    li a0, 1                    # stdout
-1:  auipc a1, %pcrel_hi(msg)    # load msg(hi)
-    addi a1, a1, %pcrel_lo(1b)  # load msg(lo)
-    la a1, msg
-    li a2, 14                   # length
-    li a7, 64                   # _NR_sys_write
-    ecall                       # system call
+.globl main
+main:
+    addi sp, sp, -4
+    sw ra, 4(sp)
 
-    li a0, 0
-    li a7, 93                   # _NR_sys_exit
-    ecall                       # system call
+    la a0, msg
+    call puts
+
+    lw ra, 4(sp)
+    addi sp, sp, 4
+    ret
 
 .section .rodata
 msg:
-    .string "Hello, World!\n"
+    .string "Hello, World!"
