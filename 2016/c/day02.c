@@ -1,7 +1,17 @@
 #include <stdio.h>
 
+void part1(FILE *f);
+void part2(FILE *f);
+
 int main() {
   FILE *f = fopen("../in/day02.in", "r");
+
+  part1(f);
+  part2(f);
+}
+
+void part1(FILE *f) {
+  fseek(f, 0, SEEK_SET);
 
   // 1 2 3
   // 4 5 6
@@ -38,4 +48,13 @@ int main() {
   }
 
   printf("%d%d%d%d%d\n", code[0], code[1], code[2], code[3], code[4]);
+}
+
+void part2(FILE *f) {
+  fseek(f, 0, SEEK_SET);
+
+  char c;
+  while ((c = fgetc(f)) != EOF) {
+    printf("%c\n", c);
+  }
 }
