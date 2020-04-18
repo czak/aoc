@@ -1,10 +1,17 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct match {
   char ch;
   int n;
+};
+
+struct room {
+  char name[128];
+  int sector_id;
+  char checksum[6];
 };
 
 int match_compare(const void *v1, const void *v2) {
@@ -17,13 +24,10 @@ int match_compare(const void *v1, const void *v2) {
     return m1->ch - m2->ch;
 }
 
-int main() {
-  char name[] = "not-a-real-room";
-
-  // count occurrences
+char *room_checksum(const char *name, char checksum[static 6]) {
   struct match counters[26] = {};
 
-  for (char *c = name; *c; c++) {
+  for (const char *c = name; *c; c++) {
     unsigned int i = *c - 'a';
     if (i >= 26)
       continue;
@@ -34,6 +38,42 @@ int main() {
   qsort(counters, 26, sizeof(struct match), match_compare);
 
   for (int i = 0; i < 5; i++) {
-    printf("%c = %d\n", counters[i].ch, counters[i].n);
+    checksum[i] = counters[i].ch;
+  }
+
+  checksum[5] = '\0';
+
+  return checksum;
+}
+
+void room_parse(const char *s, struct room *room) {
+  char sector[] = "";
+
+  char *targets[] = {room->name, sector, room->checksum};
+  char **p = &targets[0];
+
+  char ch;
+  while ((ch = *s++) != '\0') {
+    if (ch == '-' || ch == '[' || ch == ']')
+      continue;
+
+    printf("|%c| ", ch);
+  }
+}
+
+int main() {
+  char cs[] = "abcde";
+  assert(strcmp(room_checksum("not-a-real-room", cs), "oarel") == 0);
+
+  struct room room = {};
+  room_parse("not-a-real-room-404[oarel]", &room);
+  /* assert(strcmp(room.name, "notarealroom") == 0); */
+  /* assert(room.sector_id == 404); */
+  /* assert(strcmp(room.checksum, "oarel") == 0); */
+
+  FILE *f = fopen("../in/day04.in", "r");
+  char buf[100];
+  while (fgets(buf, 100, f) != NULL) {
+    buf[strlen(buf) - 1] = '\0';
   }
 }
