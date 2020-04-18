@@ -53,8 +53,6 @@ void room_parse(const char *s, struct room *room) {
   p = room->name;
   while (*s >= 'a' || *s == '-') {
     char ch = *s++;
-    if (ch == '-')
-      continue;
     *p++ = ch;
   }
 
@@ -77,13 +75,25 @@ void room_parse(const char *s, struct room *room) {
   }
 }
 
+char *decrypt(char *text, int rot) {
+  char ch, *p = text;
+  while ((ch = *p) != '\0') {
+    if (ch == '-')
+      ch = ' ';
+    else
+      ch = (ch - 'a' + rot) % ('z' - 'a' + 1) + 'a';
+    *p++ = ch;
+  }
+  return text;
+}
+
 int main() {
   char cs[] = "abcde";
   assert(strcmp(room_checksum("not-a-real-room", cs), "oarel") == 0);
 
   struct room room = {};
   room_parse("not-a-real-room-404[oarel]", &room);
-  assert(strcmp(room.name, "notarealroom") == 0);
+  assert(strcmp(room.name, "not-a-real-room-") == 0);
   assert(room.sector_id == 404);
   assert(strcmp(room.checksum, "oarel") == 0);
 
@@ -97,6 +107,8 @@ int main() {
 
     if (strcmp(room_checksum(room.name, cs), room.checksum) == 0) {
       sum += room.sector_id;
+
+      printf("%d: %s\n", room.sector_id, decrypt(room.name, room.sector_id));
     }
   }
 
