@@ -87,10 +87,19 @@ int main() {
 
   FILE *f = fopen("../in/day04.in", "r");
   char buf[100];
+  int sum = 0;
+
   while (fgets(buf, 100, f) != NULL) {
     memset(&room, 0, sizeof(struct room));
     room_parse(buf, &room);
 
-    printf("|%s|  |%s|  |%s|\n", room.name, room.sector_id, room.checksum);
+    /* printf("|%s|  |%s|  |%s|\n", room.name, room.sector_id, room.checksum);
+     */
+
+    if (strcmp(room_checksum(room.name, cs), room.checksum) == 0) {
+      sum += atoi(room.sector_id);
+    }
   }
+
+  printf("Part 1: %d\n", sum);
 }
