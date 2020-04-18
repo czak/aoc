@@ -10,7 +10,7 @@ struct match {
 
 struct room {
   char name[128];
-  char sector_id[10];
+  int sector_id;
   char checksum[6];
 };
 
@@ -59,11 +59,13 @@ void room_parse(const char *s, struct room *room) {
   }
 
   // read sector id
-  p = room->sector_id;
+  char sector_id[10] = {};
+  p = sector_id;
   while (*s >= '0' && *s <= '9') {
     char ch = *s++;
     *p++ = ch;
   }
+  room->sector_id = atoi(sector_id);
 
   // read checksum
   p = room->checksum;
@@ -82,7 +84,7 @@ int main() {
   struct room room = {};
   room_parse("not-a-real-room-404[oarel]", &room);
   assert(strcmp(room.name, "notarealroom") == 0);
-  assert(strcmp(room.sector_id, "404") == 0);
+  assert(room.sector_id == 404);
   assert(strcmp(room.checksum, "oarel") == 0);
 
   FILE *f = fopen("../in/day04.in", "r");
@@ -93,13 +95,12 @@ int main() {
     memset(&room, 0, sizeof(struct room));
     room_parse(buf, &room);
 
-    /* printf("|%s|  |%s|  |%s|\n", room.name, room.sector_id, room.checksum);
-     */
-
     if (strcmp(room_checksum(room.name, cs), room.checksum) == 0) {
-      sum += atoi(room.sector_id);
+      sum += room.sector_id;
     }
   }
 
+  // Part 1
   printf("Part 1: %d\n", sum);
+  assert(sum == 185371);
 }
