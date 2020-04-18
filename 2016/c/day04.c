@@ -10,7 +10,7 @@ struct match {
 
 struct room {
   char name[128];
-  int sector_id;
+  char sector_id[10];
   char checksum[6];
 };
 
@@ -47,17 +47,31 @@ char *room_checksum(const char *name, char checksum[static 6]) {
 }
 
 void room_parse(const char *s, struct room *room) {
-  char sector[] = "";
+  char *p;
 
-  char *targets[] = {room->name, sector, room->checksum};
-  char **p = &targets[0];
-
-  char ch;
-  while ((ch = *s++) != '\0') {
-    if (ch == '-' || ch == '[' || ch == ']')
+  // read name
+  p = room->name;
+  while (*s >= 'a' || *s == '-') {
+    char ch = *s++;
+    if (ch == '-')
       continue;
+    *p++ = ch;
+  }
 
-    printf("|%c| ", ch);
+  // read sector id
+  p = room->sector_id;
+  while (*s >= '0' && *s <= '9') {
+    char ch = *s++;
+    *p++ = ch;
+  }
+
+  // read checksum
+  p = room->checksum;
+  while (*s != ']') {
+    char ch = *s++;
+    if (ch == '[')
+      continue;
+    *p++ = ch;
   }
 }
 
@@ -67,13 +81,16 @@ int main() {
 
   struct room room = {};
   room_parse("not-a-real-room-404[oarel]", &room);
-  /* assert(strcmp(room.name, "notarealroom") == 0); */
-  /* assert(room.sector_id == 404); */
-  /* assert(strcmp(room.checksum, "oarel") == 0); */
+  assert(strcmp(room.name, "notarealroom") == 0);
+  assert(strcmp(room.sector_id, "404") == 0);
+  assert(strcmp(room.checksum, "oarel") == 0);
 
   FILE *f = fopen("../in/day04.in", "r");
   char buf[100];
   while (fgets(buf, 100, f) != NULL) {
-    buf[strlen(buf) - 1] = '\0';
+    memset(&room, 0, sizeof(struct room));
+    room_parse(buf, &room);
+
+    printf("|%s|  |%s|  |%s|\n", room.name, room.sector_id, room.checksum);
   }
 }
