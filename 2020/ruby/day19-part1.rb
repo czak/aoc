@@ -1,6 +1,6 @@
 require 'set'
 
-data = File.read('../in/day19-part1.in')
+data = File.read('../in/day19.in')
 ruledata = data.split("\n\n").first
 messages = data.split("\n\n").last.lines.map(&:strip)
 
