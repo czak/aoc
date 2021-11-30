@@ -20,7 +20,7 @@ Current solutions in Rust. Trying to stick to the daily schedule of AoC.
 
 ## 2020
 
-I did not play in 2020 on schedule, but completed the tasks a year later in preparation for 2021.
+I did not play in 2020 on schedule, but completed the tasks a year later in preparation for 2021. Ruby only.
 
 ## 2021
 
