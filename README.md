@@ -24,4 +24,8 @@ I did not play in 2020 on schedule, but completed the tasks a year later in prep
 
 ## 2021
 
-We'll see :)
+I made it to day 21 and then forgot about it ;)
+
+## 2022
+
+I'll play a bit in December, but most probably not all the way
