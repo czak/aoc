@@ -14,9 +14,27 @@ const map<string, int> SCORES {
     { "C Z", 3 + 3 },
 };
 
+const map<string, string> CHOICES {
+    { "A X", "A Z" },
+    { "B X", "B X" },
+    { "C X", "C Y" },
+    { "A Y", "A X" },
+    { "B Y", "B Y" },
+    { "C Y", "C Z" },
+    { "A Z", "A Y" },
+    { "B Z", "B Z" },
+    { "C Z", "C X" },
+};
+
 int main() {
-    string line;
-    while (getline(example, line)) {
-        dbg(SCORES.at(line));
+    vector<string> lines;
+    for (string line; getline(cin, line);) {
+        lines.push_back(line);
     }
+
+    int p1 = accumulate(lines.begin(), lines.end(), 0, [](int a, string b) { return a + SCORES.at(b); });
+    int p2 = accumulate(lines.begin(), lines.end(), 0, [](int a, string b) { return a + SCORES.at(CHOICES.at(b)); });
+
+    cout << "Part 1: " << p1 << '\n';
+    cout << "Part 2: " << p2 << '\n';
 }
