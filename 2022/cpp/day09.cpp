@@ -55,13 +55,16 @@ ostream& operator<<(ostream& out, const vec2& v) {
 
 using instruction = pair<char, int>;
 
+istream& operator>>(istream& s, instruction& i) {
+    s >> i.first >> i.second;
+    return s;
+}
+
 vector<instruction> parse(istream& input) {
     vector<instruction> v;
 
-    char dir;
-    int dist;
-    while (input >> dir >> dist) {
-        v.push_back({ dir, dist });
+    for (instruction i; input >> i;) {
+        v.push_back(i);
     }
 
     return v;
