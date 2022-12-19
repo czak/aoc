@@ -34,7 +34,8 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1)"};
 
-struct Monkey {
+struct Monkey
+{
   list<int> items;
   char operation;
   string operand;
@@ -43,7 +44,8 @@ struct Monkey {
   size_t if_false;
 };
 
-ostream &operator<<(ostream &out, const Monkey &m) {
+ostream& operator<<(ostream& out, const Monkey& m)
+{
   out << "{";
   // clang-format off
   dbg::pretty_print(out, m.items); out << ", ";
@@ -57,23 +59,25 @@ ostream &operator<<(ostream &out, const Monkey &m) {
   return out;
 }
 
-void dump(const vector<Monkey> &monkeys) {
-  for (int i = 0; i < monkeys.size(); i++) {
+void dump(const vector<Monkey>& monkeys)
+{
+  for (int i = 0; i < monkeys.size(); i++)
+  {
     cout << "Monkey " << i << ": " << monkeys[i] << '\n';
   }
 }
 
-int main() {
+int main()
+{
   string data{istreambuf_iterator{example}, {}};
-  auto monkeys = parse_to<vector<Monkey>>(data, MONKEY_REGEX, [](auto &sm) {
+  auto monkeys = parse_to<vector<Monkey>>(data, MONKEY_REGEX, [](auto& sm) {
     return Monkey{
-        parse_to<list<int>>(sm[1], NUMBER_REGEX,
-                            [](auto &sm) { return stoi(sm.str()); }),
-        sm[2].str()[0],
-        sm[3],
-        stoi(sm[4]),
-        stoul(sm[5]),
-        stoul(sm[6]),
+      parse_to<list<int>>(sm[1], NUMBER_REGEX, [](auto& sm) { return stoi(sm.str()); }),
+      sm[2].str()[0],
+      sm[3],
+      stoi(sm[4]),
+      stoul(sm[5]),
+      stoul(sm[6]),
     };
   });
 
