@@ -39,14 +39,14 @@ struct Operation
   char operation;
   string operand;
 
-  int operator()(int n)
+  uint64_t operator()(uint64_t n)
   {
     if (operand == "old") {
       if (operation == '*') return n * n;
       else if (operation == '+') return n + n;
       else throw new runtime_error{"unsupported operation"};
     } else {
-      if (operation == '*') return n * stoi(operand);
+      if (operation == '*') return n * stoul(operand);
       else if (operation == '+') return n + stoi(operand);
       else throw new runtime_error{"unsupported operation"};
     }
@@ -67,7 +67,7 @@ struct Monkey
   list<int> items;
   Operation op;
   Test test;
-  int count{0};
+  uint64_t count{0};
 };
 
 ostream& operator<<(ostream& out, const Monkey& m)
@@ -86,41 +86,30 @@ ostream& operator<<(ostream& out, const Monkey& m)
   return out;
 }
 
-void dump(const vector<Monkey>& monkeys)
+uint64_t solve(vector<Monkey> monkeys, int num_rounds, function<int(uint64_t)> post)
 {
-  for (int i = 0; i < monkeys.size(); i++) {
-    cout << "Monkey " << i << ": " << monkeys[i] << '\n';
-  }
-}
-
-void round(vector<Monkey>& monkeys)
-{
-  for (auto& [items, operation, test, count] : monkeys) {
-    while (!items.empty()) {
-      int item = operation(items.front()) / 3;
-      monkeys[test(item)].items.push_back(item);
-      items.pop_front();
-      count++;
+  for (int i = 0; i < num_rounds; i++) {
+    for (auto& [items, operation, test, count] : monkeys) {
+      while (!items.empty()) {
+        int item = post(operation(items.front()));
+        monkeys[test(item)].items.push_back(item);
+        items.pop_front();
+        count++;
+      }
     }
   }
-}
 
-int part1(vector<Monkey> monkeys)
-{
-  for (int i = 0; i < 20; i++)
-    round(monkeys);
+  sort(monkeys.begin(), monkeys.end(), [](const auto& m1, const auto& m2) { return m1.count > m2.count; });
 
-  vector<int> counts{};
-  transform(monkeys.begin(), monkeys.end(), back_inserter(counts), [](const Monkey& m) { return m.count; });
-  sort(counts.begin(), counts.end(), greater());
-
-  return counts[0] * counts[1];
+  return (uint64_t)monkeys[0].count * (uint64_t)monkeys[1].count;
 }
 
 int main()
 {
   string data{istreambuf_iterator{cin}, {}};
-  auto monkeys = parse_to<vector<Monkey>>(data, MONKEY_REGEX, [](auto& sm) {
+  int mod = 1;
+  auto monkeys = parse_to<vector<Monkey>>(data, MONKEY_REGEX, [&mod](auto& sm) {
+    mod *= stoi(sm[4]);
     return Monkey{
       parse_to<list<int>>(sm[1], NUMBER_REGEX, [](auto& sm) { return stoi(sm.str()); }),
       {sm[2].str()[0], sm[3]},
@@ -128,5 +117,6 @@ int main()
     };
   });
 
-  cout << "Part 1: " << part1(monkeys) << '\n';
+  cout << "Part 1: " << solve(monkeys, 20, [](uint64_t i) { return i / 3; }) << '\n';
+  cout << "Part 2: " << solve(monkeys, 10000, [mod](uint64_t i) { return i % mod; }) << '\n';
 }
