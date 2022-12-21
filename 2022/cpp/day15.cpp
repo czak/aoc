@@ -20,6 +20,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
 const regex REGEX{"Sensor at x=(-?\\d+), y=(-?\\d+): closest beacon is at x=(-?\\d+), y=(-?\\d+)"};
 
 using sensor = tuple<int, int, int>;
+using area = pair<int, int>;
 
 vector<sensor> parse(istream& in)
 {
@@ -33,18 +34,44 @@ vector<sensor> parse(istream& in)
   });
 }
 
+area coverage(const vector<sensor>& sensors, int row)
+{
+  vector<area> overlaps{};
+
+  for (auto& [x, y, range] : sensors) {
+    int dy = abs(y - row);
+    if (dy > range) continue;
+    overlaps.push_back({x - (range - dy), x + (range - dy)});
+  }
+
+  sort(overlaps.begin(), overlaps.end());
+
+  auto [l, r] = overlaps.front();
+  for (auto& [a, b] : overlaps) {
+    if (a == r + 2) throw a - 1; // gap
+    l = min(l, a);
+    r = max(r, b);
+  }
+
+  return {l, r};
+}
+
 int part1(const vector<sensor>& sensors, int row)
 {
-  unordered_set<int> coverage{};
-  for (auto& [x, y, range] : sensors) {
-    int yoff = abs(y - row);
-    if (yoff <= range) {
-      for (int i = x - range + yoff; i < x + range - yoff; i++) {
-        coverage.insert(i);
-      }
+  auto area = coverage(sensors, row);
+  return area.second - area.first;
+}
+
+long long part2(const vector<sensor>& sensors, int limit)
+{
+  for (int y = 0; y <= limit; y++) {
+    try {
+      coverage(sensors, y);
+    } catch (int x) {
+      return 4000000LL * x + y;
     }
   }
-  return coverage.size();
+  throw new runtime_error{"no beacon"};
 }
 
 int main()
@@ -52,4 +79,5 @@ int main()
   auto sensors = parse(cin);
 
   cout << "Part 1: " << part1(sensors, 2000000) << '\n';
+  cout << "Part 2: " << part2(sensors, 4000000) << '\n';
 }

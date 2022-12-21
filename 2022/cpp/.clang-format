@@ -29,7 +29,7 @@ BraceWrapping:
   AfterObjCDeclaration: true
   AfterStruct:     true
   AfterUnion:      true
-  BeforeCatch:     true
+  BeforeCatch:     false
   BeforeElse:      false
   IndentBraces:    false
   SplitEmptyFunction: true
