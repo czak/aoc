@@ -59,7 +59,7 @@ vector<string> parse(istream& in)
   string a, b, c;
   while (getline(in, a) && getline(in, b)) {
     v.push_back(regex_replace(a, r, "a"));
-    v.push_back(regex_replace(b, r, "b"));
+    v.push_back(regex_replace(b, r, "a"));
     getline(in, c);
   }
   return v;
