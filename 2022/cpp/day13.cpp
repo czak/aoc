@@ -25,24 +25,68 @@ istringstream example{R"([1,1,3,1,1]
 [1,[2,[3,[4,[5,6,0]]]],8,9]
 )"};
 
-struct node
-{
-  variant<int, vector<node>> data;
-};
+static regex HAX{"10"};
 
-ostream& operator<<(ostream& out, const node& n)
+bool compare(string sa, string sb)
 {
-  if (holds_alternative<int>(n.data)) out << get<int>(n.data);
-  else dbg::pretty_print(out, get<vector<node>>(n.data));
-  return out;
+  sa = regex_replace(sa, HAX, "a");
+  sb = regex_replace(sb, HAX, "a");
+
+  list<char> bufa{sa.begin(), sa.end()};
+  list<char> bufb{sb.begin(), sb.end()};
+  auto a = bufa.begin();
+  auto b = bufb.begin();
+
+  // clang-format off
+  while (a != bufa.end() && b != bufb.end()) {
+    if (*a == *b) { a++; b++; continue; }
+
+    // compare digits
+    if (isxdigit(*a) && isxdigit(*b)) return *a < *b;
+
+    // one list ending
+    if (*a == ']') return true;
+    if (*b == ']') return false;
+
+    // one list starting
+    if (*a == '[') { bufb.insert(next(b, 1), ']'); a++; continue; }
+    if (*b == '[') { bufa.insert(next(a, 1), ']'); b++; continue; }
+  }
+  // clang-format on
+
+  return true;
+}
+
+vector<string> parse(istream& in)
+{
+  vector<string> v;
+  string a, b, c;
+  while (getline(in, a) && getline(in, b)) {
+    v.push_back(a);
+    v.push_back(b);
+    getline(in, c);
+  }
+  return v;
 }
 
 int main()
 {
-  string s;
-  while (getline(example, s)) {
-    cout << "|||" << s << "|||\n";
+  vector<string> lines = parse(cin);
+
+  int sum = 0;
+  for (size_t i = 0; i < lines.size(); i += 2) {
+    if (compare(lines[i], lines[i + 1])) sum += i / 2 + 1;
   }
-  node l1{1};
-  dbg(l1);
+
+  cout << "Part 1: " << sum << '\n';
+
+  lines.push_back("[[2]]");
+  lines.push_back("[[6]]");
+
+  sort(lines.begin(), lines.end(), compare);
+
+  int i1 = find(lines.begin(), lines.end(), "[[2]]") - lines.begin() + 1;
+  int i2 = find(lines.begin(), lines.end(), "[[6]]") - lines.begin() + 1;
+
+  cout << "Part 2: " << i1 * i2 << '\n';
 }
