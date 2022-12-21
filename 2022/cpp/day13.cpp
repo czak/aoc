@@ -25,13 +25,8 @@ istringstream example{R"([1,1,3,1,1]
 [1,[2,[3,[4,[5,6,0]]]],8,9]
 )"};
 
-static regex HAX{"10"};
-
 bool compare(string sa, string sb)
 {
-  sa = regex_replace(sa, HAX, "a");
-  sb = regex_replace(sb, HAX, "a");
-
   list<char> bufa{sa.begin(), sa.end()};
   list<char> bufb{sb.begin(), sb.end()};
   auto a = bufa.begin();
@@ -60,10 +55,11 @@ bool compare(string sa, string sb)
 vector<string> parse(istream& in)
 {
   vector<string> v;
+  regex r{"10"};
   string a, b, c;
   while (getline(in, a) && getline(in, b)) {
-    v.push_back(a);
-    v.push_back(b);
+    v.push_back(regex_replace(a, r, "a"));
+    v.push_back(regex_replace(b, r, "b"));
     getline(in, c);
   }
   return v;
