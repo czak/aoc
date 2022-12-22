@@ -70,17 +70,49 @@ void measure()
   }
 }
 
-int search()
+int search(size_t cur, int time, int pressure = 0)
 {
   static vector<bool> opened(valves.size());
 
-  // TODO
+  dbg(cur, time, pressure);
 
-  return 0;
+  if (time < 0) return pressure;
+
+  // find unopened, nonzero valves (indexes)
+  vector<size_t> candidates{};
+  for (size_t i = 0; i < valves.size(); i++) {
+    if (!opened[i] && valves[i] > 0) {
+      candidates.push_back(i);
+    }
+  }
+
+  dbg(candidates);
+
+  // nowhere else to go
+  if (candidates.empty()) return pressure;
+
+  // open first
+  size_t next = candidates[0];
+  opened[next] = true;
+  int cost = distances[cur][next];
+  int time_left = time - cost - 1; // distance + 1min to open
+
+  // what if cost is higher than time left?
+  if (time_left < 0) {
+    dbg("time out");
+    return pressure;
+  }
+
+  cout << "--\n";
+
+  int pres = valves[next] * time_left;
+  return search(next, time_left, pressure + pres);
 }
 
 int main()
 {
   parse(example);
   measure();
+
+  search(0, 30);
 }
