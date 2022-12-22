@@ -18,6 +18,7 @@ regex ID_RE{"[A-Z][A-Z]"};
 
 using Graph = vector<pair<int, int>>;
 
+unordered_map<string, int> ids{};
 vector<int> valves{};
 vector<pair<int, int>> edges{};
 vector<vector<int>> distances{};
@@ -36,7 +37,6 @@ void parse(istream& in)
   });
 
   // assign integer ids
-  unordered_map<string, int> ids;
   for (size_t i = 0; i < tmp.size(); i++) {
     ids.insert({get<0>(tmp[i]), i});
   }
@@ -74,45 +74,41 @@ int search(size_t cur, int time, int pressure = 0)
 {
   static vector<bool> opened(valves.size());
 
-  dbg(cur, time, pressure);
-
-  if (time < 0) return pressure;
-
-  // find unopened, nonzero valves (indexes)
+  // candidates:
+  // - not yet opened
+  // - have flow > 0
+  // - can be reached & opened within remaining time
   vector<size_t> candidates{};
-  for (size_t i = 0; i < valves.size(); i++) {
-    if (!opened[i] && valves[i] > 0) {
-      candidates.push_back(i);
-    }
-  }
 
-  dbg(candidates);
+  for (size_t i = 0; i < valves.size(); i++) {
+    if (opened[i]) continue;
+    if (valves[i] == 0) continue;
+    if (distances[cur][i] >= time - 1) continue;
+    candidates.push_back(i);
+  }
 
   // nowhere else to go
   if (candidates.empty()) return pressure;
 
-  // open first
-  size_t next = candidates[0];
-  opened[next] = true;
-  int cost = distances[cur][next];
-  int time_left = time - cost - 1; // distance + 1min to open
+  vector<int> results{};
 
-  // what if cost is higher than time left?
-  if (time_left < 0) {
-    dbg("time out");
-    return pressure;
+  for (auto& next : candidates) {
+    int cost = distances[cur][next];
+    int time_left = time - cost - 1;
+    int pres = valves[next] * time_left;
+
+    opened[next] = true;
+    results.push_back(search(next, time_left, pressure + pres));
+    opened[next] = false;
   }
 
-  cout << "--\n";
-
-  int pres = valves[next] * time_left;
-  return search(next, time_left, pressure + pres);
+  return *max_element(results.begin(), results.end());
 }
 
 int main()
 {
-  parse(example);
+  parse(cin);
   measure();
 
-  search(0, 30);
+  cout << "Part 1: " << search(ids.at("AA"), 30) << '\n';
 }
