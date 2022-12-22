@@ -13,15 +13,18 @@ Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II
 )"};
 
+const size_t MAX_VALVES = 60;
+
 regex VALVE_RE{"Valve ([A-Z][A-Z]) has flow rate=(\\d+); tunnels? leads? to valves? (.+)"};
 regex ID_RE{"[A-Z][A-Z]"};
 
-using Graph = vector<pair<int, int>>;
+using Path = vector<pair<size_t, int>>;
 
 unordered_map<string, int> ids{};
 vector<int> valves{};
 vector<pair<int, int>> edges{};
 vector<vector<int>> distances{};
+vector<Path> paths{};
 
 void parse(istream& in)
 {
@@ -70,9 +73,16 @@ void measure()
   }
 }
 
-int search(size_t cur, int time, int pressure = 0)
+void search(size_t cur, int time)
 {
-  static vector<bool> opened(valves.size());
+  static Path path{};
+
+  auto is_opened = [](size_t i) {
+    for (auto& [valve, timestamp] : path) {
+      if (valve == i) return true;
+    }
+    return false;
+  };
 
   // candidates:
   // - not yet opened
@@ -81,28 +91,66 @@ int search(size_t cur, int time, int pressure = 0)
   vector<size_t> candidates{};
 
   for (size_t i = 0; i < valves.size(); i++) {
-    if (opened[i]) continue;
+    if (is_opened(i)) continue;
     if (valves[i] == 0) continue;
     if (distances[cur][i] >= time - 1) continue;
     candidates.push_back(i);
   }
 
   // nowhere else to go
-  if (candidates.empty()) return pressure;
+  if (candidates.empty()) {
+    paths.push_back(path);
+    return;
+  }
 
   vector<int> results{};
 
   for (auto& next : candidates) {
     int cost = distances[cur][next];
     int time_left = time - cost - 1;
-    int pres = valves[next] * time_left;
 
-    opened[next] = true;
-    results.push_back(search(next, time_left, pressure + pres));
-    opened[next] = false;
+    path.push_back({next, time_left});
+    search(next, time_left);
+    path.pop_back();
+  }
+}
+
+int part1()
+{
+  vector<int> scores{};
+  transform(paths.begin(), paths.end(), back_inserter(scores), [](Path& p) {
+    return accumulate(p.begin(), p.end(), 0,
+                      [](int acc, pair<size_t, int>& step) { return acc + valves[step.first] * step.second; });
+  });
+  return *max_element(scores.begin(), scores.end());
+}
+
+int part2()
+{
+  int best = 0;
+
+  for (auto& path1 : paths) {
+    for (auto& path2 : paths) {
+      auto it1 = path1.begin();
+      auto it2 = path2.begin();
+      bool opened[MAX_VALVES]{false};
+      int score = 0;
+
+      while (it1 != path1.end() || it2 != path2.end()) {
+        auto& it = it1 == path1.end() ? it2 : (it2 == path2.end() || it1->second > it2->second ? it1 : it2);
+
+        auto [n, t] = *it;
+        if (opened[n]) break;
+        opened[n] = true;
+        score += valves[n] * t;
+        it++;
+      }
+
+      best = max(best, score);
+    }
   }
 
-  return *max_element(results.begin(), results.end());
+  return best;
 }
 
 int main()
@@ -110,5 +158,11 @@ int main()
   parse(cin);
   measure();
 
-  cout << "Part 1: " << search(ids.at("AA"), 30) << '\n';
+  search(ids.at("AA"), 30);
+  cout << "Part 1: " << part1() << '\n';
+
+  paths.clear();
+
+  search(ids.at("AA"), 26);
+  cout << "Part 2: " << part2() << '\n';
 }

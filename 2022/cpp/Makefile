@@ -5,6 +5,8 @@ day11: day11.cpp day11_regex.o include/utils.h
 
 day15: CXXFLAGS += -O2
 
+day16: CXXFLAGS += -O2
+
 .PHONY: precompile
 precompile:
 	$(CXX) $(CXXFLAGS) include/stdafx.h
