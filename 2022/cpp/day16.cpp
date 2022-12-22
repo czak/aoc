@@ -16,10 +16,13 @@ Valve JJ has flow rate=21; tunnel leads to valve II
 regex VALVE_RE{"Valve ([A-Z][A-Z]) has flow rate=(\\d+); tunnels? leads? to valves? (.+)"};
 regex ID_RE{"[A-Z][A-Z]"};
 
-using Valve = int;
 using Graph = vector<pair<int, int>>;
 
-tuple<vector<Valve>, Graph> parse(istream& in)
+vector<int> valves{};
+vector<pair<int, int>> edges{};
+vector<vector<int>> distances{};
+
+void parse(istream& in)
 {
   using TmpValve = tuple<string, int, vector<string>>;
 
@@ -39,8 +42,6 @@ tuple<vector<Valve>, Graph> parse(istream& in)
   }
 
   // map into valves and edges
-  vector<int> valves{};
-  vector<pair<int, int>> edges{};
   for (size_t i = 0; i < tmp.size(); i++) {
     auto tv = tmp[i];
     valves.push_back(get<1>(tv));
@@ -49,42 +50,37 @@ tuple<vector<Valve>, Graph> parse(istream& in)
       edges.push_back({i, n});
     }
   }
-
-  return {valves, edges};
 }
 
-vector<int> distance(const Graph& edges, int n, int start)
+void measure()
 {
-  vector<int> distance(n, 1000000);
-  distance[start] = 0;
+  int n = valves.size();
 
-  for (int i = 0; i < n; i++) {
-    for (auto [a, b] : edges) {
-      distance[b] = min(distance[b], distance[a] + 1);
+  for (int start = 0; start < n; start++) {
+    vector<int> distance(n, 1000000);
+    distance[start] = 0;
+
+    for (int i = 0; i < n; i++) {
+      for (auto [a, b] : edges) {
+        distance[b] = min(distance[b], distance[a] + 1);
+      }
     }
-  }
 
-  return distance;
+    distances.push_back(distance);
+  }
 }
 
-vector<vector<int>> measure(const Graph& edges, int n)
-{
-  vector<vector<int>> distances{};
-  for (int i = 0; i < n; i++) {
-    distances.push_back(distance(edges, n, i));
-  }
-  return distances;
-}
-
-void search(const vector<Valve>& valves, const vector<vector<int>>& distances, int pressure, int time_left)
+int search()
 {
   static vector<bool> opened(valves.size());
+
+  // TODO
+
+  return 0;
 }
 
 int main()
 {
-  auto [valves, edges] = parse(example);
-  auto distances = measure(edges, valves.size());
-
-  search(valves, distances, 0, 30);
+  parse(example);
+  measure();
 }
