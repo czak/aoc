@@ -37,7 +37,7 @@ void parse(istream& input)
   );
 }
 
-long part1(string key)
+long solve(string key)
 {
   value val = ops[key];
   if (holds_alternative<long>(val)) return get<long>(val);
@@ -46,13 +46,13 @@ long part1(string key)
 
   switch (op) {
     case '+':
-      return part1(lhs) + part1(rhs);
+      return solve(lhs) + solve(rhs);
     case '-':
-      return part1(lhs) - part1(rhs);
+      return solve(lhs) - solve(rhs);
     case '*':
-      return part1(lhs) * part1(rhs);
+      return solve(lhs) * solve(rhs);
     case '/':
-      return part1(lhs) / part1(rhs);
+      return solve(lhs) / solve(rhs);
   }
 
   return -1;
@@ -62,5 +62,22 @@ int main()
 {
   parse(cin);
 
-  cout << "Part 1: " << part1("root") << '\n';
+  cout << "Part 1: " << solve("root") << '\n';
+
+  // większe od 3266318702264
+  // mniejsze od 3366318702264
+
+  for (long i = 3296135382264; i < 3366318702264; i++) {
+    ops["humn"] = i;
+
+    long lvvf = solve("lvvf");
+    long rqgq = solve("rqgq");
+
+    if (lvvf == rqgq) {
+      cout << "Part 2: " << i << '\n';
+      break;
+    }
+
+    cout << abs(lvvf - rqgq) << '\r';
+  }
 }
