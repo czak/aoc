@@ -8,9 +8,11 @@ istringstream example{R"(1
 0
 4)"};
 
+using ll = long long;
+
 struct Node
 {
-  int n;
+  ll n;
   Node* prev;
   Node* next;
 };
@@ -27,7 +29,7 @@ void dump(Node* head)
   cout << endl;
 }
 
-vector<Node*> make_list(vector<int> numbers)
+vector<Node*> make_list(vector<ll> numbers)
 {
   assert(numbers.size() > 0);
 
@@ -51,20 +53,21 @@ vector<Node*> make_list(vector<int> numbers)
   return nodes;
 }
 
-vector<int> parse(istream& input)
+vector<ll> parse(istream& input)
 {
-  vector<int> numbers{};
-  int n;
+  vector<ll> numbers{};
+  ll n;
   while (input >> n)
     numbers.push_back(n);
   return numbers;
 }
 
-int part1(const vector<int>& numbers)
+void mix(vector<Node*>& nodes)
 {
-  auto nodes = make_list(numbers);
-
   for (auto node : nodes) {
+    ll shift = abs(node->n) % (nodes.size() - 1);
+    if (shift == 0) continue;
+
     // remove from list
     Node* prev = node->prev;
     Node* next = node->next;
@@ -73,12 +76,12 @@ int part1(const vector<int>& numbers)
 
     if (node->n < 0) {
       prev = node->prev;
-      for (int i = 0; i < abs(node->n); i++) {
+      for (int i = 0; i < shift; i++) {
         prev = prev->prev;
       }
     } else if (node->n > 0) {
       prev = node;
-      for (int i = 0; i < abs(node->n); i++) {
+      for (int i = 0; i < shift; i++) {
         prev = prev->next;
       }
     }
@@ -90,6 +93,14 @@ int part1(const vector<int>& numbers)
     node->prev = prev;
     node->next = next;
   }
+}
+
+ll solve(const vector<ll>& numbers, int num_mixes = 1)
+{
+  auto nodes = make_list(numbers);
+
+  for (int m = 0; m < num_mixes; m++)
+    mix(nodes);
 
   // find 0
   Node* node = nodes[0];
@@ -97,18 +108,12 @@ int part1(const vector<int>& numbers)
     node = node->next;
 
   // sum at 1000, 2000, 3000
-  int sum = 0;
-  for (int i = 0; i < 1000; i++)
-    node = node->next;
-  sum += node->n;
-
-  for (int i = 0; i < 1000; i++)
-    node = node->next;
-  sum += node->n;
-
-  for (int i = 0; i < 1000; i++)
-    node = node->next;
-  sum += node->n;
+  ll sum = 0;
+  for (int j = 0; j < 3; j++) {
+    for (int i = 0; i < 1000; i++)
+      node = node->next;
+    sum += node->n;
+  }
 
   return sum;
 }
@@ -117,5 +122,10 @@ int main()
 {
   auto numbers = parse(cin);
 
-  cout << "Part 1: " << part1(numbers) << '\n';
+  cout << "Part 1: " << flush << solve(numbers) << '\n';
+
+  for (auto& n : numbers)
+    n *= 811589153;
+
+  cout << "Part 2: " << flush << solve(numbers, 10) << '\n';
 }
