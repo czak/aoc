@@ -7,6 +7,8 @@ day15: CXXFLAGS += -O2
 
 day16: CXXFLAGS += -O2
 
+day19: CXXFLAGS += -O2
+
 .PHONY: precompile
 precompile:
 	$(CXX) $(CXXFLAGS) include/stdafx.h
