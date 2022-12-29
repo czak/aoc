@@ -1,20 +1,5 @@
 #include "stdafx.h"
 
-istringstream example{R"(        ...#
-        .#..
-        #...
-        ....
-...#.......#
-........#...
-..#....#....
-..........#.
-        ...#....
-        .....#..
-        .#......
-        ......#.
-
-10R5L5R10L4R5L5)"};
-
 map<int, pair<long, long>> directions{
   {0, {1, 0} },
   {1, {0, 1} },
@@ -23,12 +8,12 @@ map<int, pair<long, long>> directions{
 };
 
 pair<int, int> side_coords[6]{
+  {1, 0},
   {2, 0},
-  {0, 1},
   {1, 1},
-  {2, 1},
-  {2, 2},
-  {3, 2},
+  {0, 2},
+  {1, 2},
+  {0, 3},
 };
 
 vector<string> board;
@@ -60,7 +45,7 @@ void parse(istream& input)
   height = board.size();
 
   // split sides
-  dim = width / 4;
+  dim = width / 3; // DIFFERENT LAYOUT IN EXAMPLE
   for (int side = 0; side < 6; side++) {
     auto [sx, sy] = side_coords[side];
     for (int y = sy * dim; y < (sy + 1) * dim; y++) {
@@ -70,18 +55,23 @@ void parse(istream& input)
 }
 
 /*
-        0000
-        0000
-        0000
-        0000
-111122223333
-111122223333
-111122223333
-111122223333
-        44445555
-        44445555
-        44445555
-        44445555
+input:
+    00001111
+    00001111
+    00001111
+    00001111
+    2222
+    2222
+    2222
+    2222
+33334444
+33334444
+33334444
+33334444
+5555
+5555
+5555
+5555
 */
 
 // clang-format off
@@ -94,43 +84,42 @@ void warp(int& s, int& x, int& y, int& o)
 
   if (o == 0) { // going right
     switch (s) {
-      case 0: s = 5; x = end; y = end - oy; o = 2; break;
-      case 1: s = 2; x = 0; /* y unchanged */ /* o unchanged */ break;
-      case 2: s = 3; x = 0; /* y unchanged */ /* o unchanged */ break;
-      case 3: s = 5; x = end - oy; y = 0; o = 1; break;
-      case 4: s = 5; x = 0; /* y unchanged */ /* o unchanged */ break;
-      case 5: s = 0; x = end; y = end - oy; o = 2; break;
+      case 0: s = 1; x = 0; /* y unchanged */ /* o unchanged */ break;
+      case 1: s = 4; x = end; y = end - oy; o = 2; break;
+      case 2: s = 1; x = oy; y = end; o = 3; break;
+      case 3: s = 4; x = 0; /* y unchanged */ /* o unchanged */ break;
+      case 4: s = 1; x = end; y = end - oy; o = 2; break;
+      case 5: s = 4; x = oy; y = end; o = 3; break;
     }
   } else if (o == 1) { // going down
     switch (s) {
-      case 0: s = 3; /* x unchanged */ y = 0; /* o unchanged */ break;
-      case 1: s = 4; x = end - ox; y = end; o = 3; break;
-      case 2: s = 4; x = 0; y = ox; o = 0; break;
-      case 3: s = 4; /* x unchanged */ y = 0; /* o unchanged */ break;
-      case 4: s = 1; x = end - ox; y = end; o = 3; break;
-      case 5: s = 1; x = 0; y = ox; o = 0; break;
+      case 0: s = 2; /* x unchanged */ y = 0; /* o unchanged */; break;
+      case 1: s = 2; x = end; y = ox; o = 2; break;
+      case 2: s = 4; /* x unchanged */ y = 0; /* o unchanged */; break;
+      case 3: s = 5; /* x unchanged */ y = 0; /* o unchanged */; break;
+      case 4: s = 5; x = end; y = ox; o = 2; break;
+      case 5: s = 1; /* x unchanged */ y = 0; /* o unchanged */; break; // ? from 5 to 1 ?
     }
   } else if (o == 2) { // going left
     switch (s) {
-      case 0: s = 2; x = oy; y = 0; o = 1; break;
-      case 1: s = 5; x = end - oy; y = end; o = 3; break;
-      case 2: s = 1; x = end; /* y unchanged */ /* o unchanged */ break;
-      case 3: s = 2; x = end; /* y unchanged */ /* o unchanged */ break;
-      case 4: s = 3; x = end - oy; y = end; o = 3; break;
-      case 5: s = 4; x = end; /* y unchanged */ /* o unchanged */ break;
+      case 0: s = 3; x = 0; y = end - oy; o = 0; break;
+      case 1: s = 0; x = end; /* y unchanged */ /* o unchanged */ break;
+      case 2: s = 3; x = oy; y = 0; o = 1; break;
+      case 3: s = 0; x = 0; y = end - oy; o = 0; break;
+      case 4: s = 3; x = end; /* y unchanged */ /* o unchanged */ break;
+      case 5: s = 0; x = oy; y = 0; o = 1; break;
     }
   } else if (o == 3) { // going up
-    switch(s) {
-      case 0: s = 1; x = end - ox; y = 0; o = 1; break;
-      case 1: s = 0; x = end - ox; y = 0; o = 1; break;
-      case 2: s = 0; x = 0; y = ox; o = 0; break;
-      case 3: s = 0; /* x unchanged */ y = end; /* o unchanged */ break;
-      case 4: s = 3; /* x unchanged */ y = end; /* o unchanged */ break;
-      case 5: s = 3; x = end; y = end - ox; o = 2; break;
+    switch (s) {
+      case 0: s = 5; x = 0; y = ox; o = 0; break;
+      case 1: s = 5; /* x unchanged */ y = end; /* o unchanged */ break;
+      case 2: s = 0; /* x unchanged */ y = end; /* o unchanged */ break;
+      case 3: s = 2; x = 0; y = ox; o = 0; break;
+      case 4: s = 2; /* x unchanged */ y = end; /* o unchanged */ break;
+      case 5: s = 3; /* x unchanged */ y = end; /* o unchanged */ break;
     }
   }
 }
-// clang-format on
 
 void move(int& s, int& x, int& y, int& o)
 {
@@ -149,9 +138,9 @@ void move(int& s, int& x, int& y, int& o)
     x = nx;
     y = ny;
     o = no;
-    cout << "-> " << s << ' ' << x << ',' << y << " >" << o << '\n';
+    // cout << "-> " << s << ' ' << x << ',' << y << " >" << o << '\n';
   } else {
-    cout << "-- " << s << ' ' << x << ',' << y << " >" << o << '\n';
+    // cout << "-- " << s << ' ' << x << ',' << y << " >" << o << '\n';
   }
 }
 
@@ -194,7 +183,7 @@ long part2()
 
 int main()
 {
-  parse(example);
+  parse(cin);
 
   cout << "Part 2: " << part2() << '\n';
 }
