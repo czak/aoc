@@ -69,45 +69,68 @@ void parse(istream& input)
   }
 }
 
+/*
+        0000
+        0000
+        0000
+        0000
+111122223333
+111122223333
+111122223333
+111122223333
+        44445555
+        44445555
+        44445555
+        44445555
+*/
+
+// clang-format off
 void warp(int& s, int& x, int& y, int& o)
 {
-  if (o == 0) {
-    // going right
+  // original x and y
+  int ox = x;
+  int oy = y;
+  int end = dim - 1;
+
+  if (o == 0) { // going right
     switch (s) {
-      case 0:
-      {
-        s = 5;
-        x = dim - 1;
-        y = dim - y;
-        o = 2;
-        break;
-      }
-      case 1:
-      {
-        s = 2;
-        x = 0;
-        // y unchanged
-        // o unchanged
-        break;
-      }
-      case 2:
-      {
-        s = 3;
-        x = 0;
-        // y unchanged
-        // o unchanged
-        break;
-      }
-      case 3:
-      {
-        s = 5;
-        x = dim - y;
-        y = 0;
-        o = 1;
-      }
+      case 0: s = 5; x = end; y = end - oy; o = 2; break;
+      case 1: s = 2; x = 0; /* y unchanged */ /* o unchanged */ break;
+      case 2: s = 3; x = 0; /* y unchanged */ /* o unchanged */ break;
+      case 3: s = 5; x = end - oy; y = 0; o = 1; break;
+      case 4: s = 5; x = 0; /* y unchanged */ /* o unchanged */ break;
+      case 5: s = 0; x = end; y = end - oy; o = 2; break;
+    }
+  } else if (o == 1) { // going down
+    switch (s) {
+      case 0: s = 3; /* x unchanged */ y = 0; /* o unchanged */ break;
+      case 1: s = 4; x = end - ox; y = end; o = 3; break;
+      case 2: s = 4; x = 0; y = ox; o = 0; break;
+      case 3: s = 4; /* x unchanged */ y = 0; /* o unchanged */ break;
+      case 4: s = 1; x = end - ox; y = end; o = 3; break;
+      case 5: s = 1; x = 0; y = ox; o = 0; break;
+    }
+  } else if (o == 2) { // going left
+    switch (s) {
+      case 0: s = 2; x = oy; y = 0; o = 1; break;
+      case 1: s = 5; x = end - oy; y = end; o = 3; break;
+      case 2: s = 1; x = end; /* y unchanged */ /* o unchanged */ break;
+      case 3: s = 2; x = end; /* y unchanged */ /* o unchanged */ break;
+      case 4: s = 3; x = end - oy; y = end; o = 3; break;
+      case 5: s = 4; x = end; /* y unchanged */ /* o unchanged */ break;
+    }
+  } else if (o == 3) { // going up
+    switch(s) {
+      case 0: s = 1; x = end - ox; y = 0; o = 1; break;
+      case 1: s = 0; x = end - ox; y = 0; o = 1; break;
+      case 2: s = 0; x = 0; y = ox; o = 0; break;
+      case 3: s = 0; /* x unchanged */ y = end; /* o unchanged */ break;
+      case 4: s = 3; /* x unchanged */ y = end; /* o unchanged */ break;
+      case 5: s = 3; x = end; y = end - ox; o = 2; break;
     }
   }
 }
+// clang-format on
 
 void move(int& s, int& x, int& y, int& o)
 {
@@ -126,6 +149,9 @@ void move(int& s, int& x, int& y, int& o)
     x = nx;
     y = ny;
     o = no;
+    cout << "-> " << s << ' ' << x << ',' << y << " >" << o << '\n';
+  } else {
+    cout << "-- " << s << ' ' << x << ',' << y << " >" << o << '\n';
   }
 }
 
@@ -159,6 +185,10 @@ long part2()
     move(s, x, y, o);
   }
 
+  // place on board
+  x += side_coords[s].first * dim;
+  y += side_coords[s].second * dim;
+
   return 1000 * (y + 1) + 4 * (x + 1) + o;
 }
 
@@ -166,7 +196,5 @@ int main()
 {
   parse(example);
 
-  dbg(cube);
-
-  // cout << "Part 1: " << part1() << '\n';
+  cout << "Part 2: " << part2() << '\n';
 }
