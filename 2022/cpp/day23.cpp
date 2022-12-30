@@ -93,7 +93,7 @@ void round(int r)
   }
 }
 
-void dump()
+tuple<int, int, int, int> area()
 {
   auto xrange =
     minmax_element(elves.begin(), elves.end(), [](auto& l, auto& r) { return l.first < r.first; });
@@ -101,8 +101,12 @@ void dump()
     return l.second < r.second;
   });
 
-  auto [xmin, xmax] = tie(xrange.first->first, xrange.second->first);
-  auto [ymin, ymax] = tie(yrange.first->second, yrange.second->second);
+  return {xrange.first->first, xrange.second->first, yrange.first->second, yrange.second->second};
+}
+
+void dump()
+{
+  auto [xmin, xmax, ymin, ymax] = area();
 
   for (int y = ymin; y <= ymax; y++) {
     for (int x = xmin; x <= xmax; x++) {
@@ -113,13 +117,20 @@ void dump()
   }
 }
 
+int part1()
+{
+  for (int i = 0; i < 10; i++) {
+    round(i);
+  }
+
+  auto [xmin, xmax, ymin, ymax] = area();
+
+  return (xmax - xmin + 1) * (ymax - ymin + 1) - elves.size();
+}
+
 int main()
 {
-  parse(example);
+  parse(cin);
 
-  round(0);
-  round(1);
-  round(2);
-
-  dump();
+  cout << "Part 1: " << part1() << '\n';
 }
