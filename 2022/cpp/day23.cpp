@@ -128,9 +128,24 @@ int part1()
   return (xmax - xmin + 1) * (ymax - ymin + 1) - elves.size();
 }
 
+int part2()
+{
+  int i = 10;
+  set<vec2> prev{};
+
+  while (prev != elves) {
+    prev = elves;
+    round(i);
+    i++;
+  }
+
+  return i;
+}
+
 int main()
 {
   parse(cin);
 
   cout << "Part 1: " << part1() << '\n';
+  cout << "Part 2: " << part2() << '\n';
 }
