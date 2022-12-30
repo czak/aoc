@@ -17,7 +17,7 @@ istringstream example2{R"(#.######
 ######.#
 )"};
 
-const size_t MAX_MINUTES = 50;
+const size_t MAX_MINUTES = 300;
 
 using Wind = tuple<int, int, int, int>;   // x, y, dx, dy
 using PointInTime = tuple<int, int, int>; // x, y, t
@@ -138,7 +138,7 @@ void measure()
     dist[{0, -1, t}] = 1'000'000;
     dist[{width - 1, height, t}] = 1'000'000;
     for (int y = 0; y < height; y++) {
-      for (int x = 0; x < height; x++) {
+      for (int x = 0; x < width; x++) {
         dist[{x, y, t}] = 1'000'000;
       }
     }
@@ -169,27 +169,16 @@ void measure()
 
 int main()
 {
-  parse(example2);
+  parse(cin);
 
   make_graph();
   measure();
 
-  dbg((graph[{0, -1, 0}]));
-
-  // up to this one is correct
-  dbg((graph[{3, 2, 14}]));
-  dbg((dist[{3, 2, 14}])); // correctly 14
-
-  // this one is not
-  dbg((graph[{4, 2, 15}]));
-  dbg((dist[{4, 2, 15}])); // why is this 0?
-
   int best = 1000000;
   for (auto& [p, d] : dist) {
     auto& [x, y, t] = p;
-    if (x == width - 1 && y == height - 1 && d < 1'000'000) {
+    if (x == width - 1 && y == height && d < 1'000'000) {
       best = min(d, best);
-      dbg(p, d);
     }
   }
 
