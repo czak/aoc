@@ -130,9 +130,50 @@ void make_graph()
   }
 }
 
+void make_graph_reverse()
+{
+  unordered_set<Wind> cur{winds.begin(), winds.end()}, last{};
+  unsigned int t = 0;
+
+  auto test_move = [&t, &last, &cur](int x, int y, int tx, int ty) {
+    if (is_open(last, x, y) && is_open(cur, tx, ty)) {
+      graph[{x, y, t - 1}].push_back({tx, ty, t});
+    }
+  };
+
+  for (t = 1; t <= MAX_MINUTES; t++) {
+    last = move(cur);
+    simulate();
+    cur = {winds.begin(), winds.end()};
+
+    // always can wait at the start
+    graph[{width - 1, height, t - 1}].push_back({width - 1, height, t});
+
+    // can move into first open spot?
+    if (is_open(cur, width - 1, height - 1))
+      graph[{width - 1, height, t - 1}].push_back({width - 1, height - 1, t});
+
+    // moves within the grid
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        // wait
+        test_move(x, y, x, y);
+        // right, down, left, up
+        test_move(x, y, x + 1, y);
+        test_move(x, y, x, y + 1);
+        test_move(x, y, x - 1, y);
+        test_move(x, y, x, y - 1);
+      }
+    }
+
+    // can move into finish line?
+    if (is_open(last, 0, 0)) graph[{0, 0, t - 1}].push_back({0, -1, t});
+  }
+}
+
 map<PointInTime, int> dist{};
 
-void measure()
+void measure(PointInTime start)
 {
   for (unsigned int t = 0; t <= MAX_MINUTES; t++) {
     dist[{0, -1, t}] = 1'000'000;
@@ -147,10 +188,8 @@ void measure()
   set<PointInTime> processed{};
   priority_queue<pair<int, PointInTime>> q;
 
-  dist[{0, -1, 0}] = 0;
-  q.push({
-    0, {0, -1, 0}
-  });
+  dist[start] = 0;
+  q.push({0, start});
 
   while (!q.empty()) {
     PointInTime a = q.top().second;
@@ -167,20 +206,31 @@ void measure()
   }
 }
 
-int main()
+int min_dist(int x, int y)
 {
-  parse(cin);
-
-  make_graph();
-  measure();
-
   int best = 1000000;
+
   for (auto& [p, d] : dist) {
-    auto& [x, y, t] = p;
-    if (x == width - 1 && y == height && d < 1'000'000) {
+    auto& [px, py, pt] = p;
+    if (px == x && py == y && d < 1'000'000) {
       best = min(d, best);
     }
   }
 
-  dbg(best);
+  return best;
+}
+
+int main()
+{
+  parse(cin);
+
+  // 221
+  // 258
+  for (int i = 0; i < 221 + 258; i++)
+    simulate();
+
+  make_graph();
+  measure({0, -1, 0});
+
+  cout << "Part 2: " << 221 + 258 + min_dist(width - 1, height) << '\n';
 }
