@@ -61,13 +61,10 @@ long cost(const state& s, long i, long to)
   if (from <= 0x6 && (to < r0 || to > r3))
     return -1;
 
-  // cave occupancy
-  // cave[0x7] == -1 means that 1st chamber of cave A is vacant
-  // cave[0x8] ==  1 means that 2nd chamber of cave A is inhabited by second amphipod A
-  long cave[0x16 + 1]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  bool mine[0x16 + 1]{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+  bool occupied[0x16 + 1]{};
+  bool mine[0x16 + 1]{};
   for (long j = 0; j < 16; j++) {
-    cave[s[j]] = j;
+    occupied[s[j]] = true;
     mine[s[j]] = (j / 4 == group); // mine[x] == true if x is occupied by one of my own group
   }
 
@@ -97,67 +94,34 @@ long cost(const state& s, long i, long to)
   // --- from here on we're dealing with valid moves, but the path can be blocked ---
 
   for (auto& step : p->first) {
-    if (cave[step] != -1) return -1;
+    if (occupied[step]) return -1;
   }
 
   return p->second * multipliers[i];
 }
 
-const __int128_t solved =
-  (__int128_t(0x07) << 0) +
-  (__int128_t(0x08) << 5) +
-  (__int128_t(0x09) << 10) +
-  (__int128_t(0x0A) << 15) +
-  (__int128_t(0x0B) << 20) +
-  (__int128_t(0x0C) << 25) +
-  (__int128_t(0x0D) << 30) +
-  (__int128_t(0x0E) << 35) +
-  (__int128_t(0x0F) << 40) +
-  (__int128_t(0x10) << 45) +
-  (__int128_t(0x11) << 50) +
-  (__int128_t(0x12) << 55) +
-  (__int128_t(0x13) << 60) +
-  (__int128_t(0x14) << 65) +
-  (__int128_t(0x15) << 70) +
-  (__int128_t(0x16) << 75);
+const state solved{
+  0x07, 0x08, 0x09, 0x0A,
+  0x0B, 0x0C, 0x0D, 0x0E,
+  0x0F, 0x10, 0x11, 0x12,
+  0x13, 0x14, 0x15, 0x16,
+};
 
-__int128_t key(const state& s)
+state normalized(state s)
 {
-  array<__int128_t, 4> ga{s[0], s[1], s[2], s[3]};
-  array<__int128_t, 4> gb{s[4], s[5], s[6], s[7]};
-  array<__int128_t, 4> gc{s[8], s[9], s[10], s[11]};
-  array<__int128_t, 4> gd{s[12], s[13], s[14], s[15]};
-
-  sort(ga.begin(), ga.end());
-  sort(gb.begin(), gb.end());
-  sort(gc.begin(), gc.end());
-  sort(gd.begin(), gd.end());
-
-  return
-    (ga[0] << 0) +
-    (ga[1] << 5) +
-    (ga[2] << 10) +
-    (ga[3] << 15) +
-    (gb[0] << 20) +
-    (gb[1] << 25) +
-    (gb[2] << 30) +
-    (gb[3] << 35) +
-    (gc[0] << 40) +
-    (gc[1] << 45) +
-    (gc[2] << 50) +
-    (gc[3] << 55) +
-    (gd[0] << 60) +
-    (gd[1] << 65) +
-    (gd[2] << 70) +
-    (gd[3] << 75);
+  sort(s.begin() + 0, s.begin() + 4);
+  sort(s.begin() + 4, s.begin() + 8);
+  sort(s.begin() + 8, s.begin() + 12);
+  sort(s.begin() + 12, s.begin() + 16);
+  return s;
 }
 
-map<__int128_t, long> memo{};
+map<state, long> memo{};
 
 // cost of transitioning to a fully-sorted state (all in their respective rooms)
 long solve(state& s, int level=0)
 {
-  __int128_t k = key(s);
+  state k = normalized(s);
 
   if (k == solved) return 0;
 
@@ -204,6 +168,8 @@ int main()
     0x0B, 0x0C, 0x12, 0x15,
     0x08, 0x09, 0x0E, 0x13,
   };
+
+  cout << "Example: " << solve(example) << endl;
 
   // input:
   // #############
