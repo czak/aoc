@@ -1,27 +1,41 @@
 #include "stdafx.h"
 
+// 01·2·3·4·56
+//   7 b f 3
+//   8 c 0 4
+//   9 d 1 5
+//   a e 2 6
+
 // adj[from] = vector<pair<to, weight>>
 unordered_map<long, vector<pair<long, long>>> adj{
   // corridor
-  {0x0, {{0x1, 1}}},
-  {0x1, {{0x0, 1}, {0x2, 2}, {0x7, 2}}},
-  {0x2, {{0x1, 2}, {0x3, 2}, {0x7, 2}, {0x9, 2}}},
-  {0x3, {{0x2, 2}, {0x4, 2}, {0x9, 2}, {0xB, 2}}},
-  {0x4, {{0x3, 2}, {0x5, 2}, {0xB, 2}, {0xD, 2}}},
-  {0x5, {{0x4, 2}, {0x6, 1}, {0xD, 2}}},
-  {0x6, {{0x5, 1}}},
+  {0x00, {{0x01, 1}}},
+  {0x01, {{0x00, 1}, {0x02, 2}, {0x07, 2}}},
+  {0x02, {{0x01, 2}, {0x03, 2}, {0x07, 2}, {0x0B, 2}}},
+  {0x03, {{0x02, 2}, {0x04, 2}, {0x0B, 2}, {0x0F, 2}}},
+  {0x04, {{0x03, 2}, {0x05, 2}, {0x0F, 2}, {0x13, 2}}},
+  {0x05, {{0x04, 2}, {0x06, 1}, {0x13, 2}}},
+  {0x06, {{0x05, 1}}},
   // room A
-  {0x7, {{0x1, 2}, {0x2, 2}, {0x8, 1}}},
-  {0x8, {{0x7, 1}}},
+  {0x07, {{0x01, 2}, {0x02, 2}, {0x08, 1}}},
+  {0x08, {{0x07, 1}, {0x09, 1}}},
+  {0x09, {{0x08, 1}, {0x0A, 1}}},
+  {0x0A, {{0x09, 1}}},
   // room B
-  {0x9, {{0x2, 2}, {0x3, 2}, {0xA, 1}}},
-  {0xA, {{0x9, 1}}},
+  {0x0B, {{0x02, 2}, {0x03, 2}, {0x0C, 1}}},
+  {0x0C, {{0x0B, 1}, {0x0D, 1}}},
+  {0x0D, {{0x0C, 1}, {0x0E, 1}}},
+  {0x0E, {{0x0D, 1}}},
   // room C
-  {0xB, {{0x3, 2}, {0x4, 2}, {0xC, 1}}},
-  {0xC, {{0xB, 1}}},
+  {0x0F, {{0x03, 2}, {0x04, 2}, {0x10, 1}}},
+  {0x10, {{0x0F, 1}, {0x11, 1}}},
+  {0x11, {{0x10, 1}, {0x12, 1}}},
+  {0x12, {{0x11, 1}}},
   // room D
-  {0xD, {{0x4, 2}, {0x5, 2}, {0xE, 1}}},
-  {0xE, {{0xD, 1}}},
+  {0x13, {{0x04, 2}, {0x05, 2}, {0x14, 1}}},
+  {0x14, {{0x13, 1}, {0x15, 1}}},
+  {0x15, {{0x14, 1}, {0x16, 1}}},
+  {0x16, {{0x15, 1}}},
 };
 
 
@@ -29,15 +43,11 @@ unordered_map<long, vector<pair<long, long>>> adj{
 using path = pair<vector<long>, long>;
 
 // paths[from][to] = optional<path>
-array<array<optional<path>, 15>, 15> paths{};
-
-// 01·2·3·4·56
-//   7 9 b d
-//   8 a c e
+array<array<optional<path>, 0x16 + 1>, 0x16 + 1> paths{};
 
 path find_path(long from, long to)
 {
-  static bool visited[15]{};
+  static bool visited[0x16 + 1]{};
 
   if (from == to) return {{}, 0};
 
@@ -63,8 +73,8 @@ path find_path(long from, long to)
 
 void precalc()
 {
-  for (long from = 0x0; from <= 0xE; from++) {
-    for (long to = 0x0; to <= 0xE; to++) {
+  for (long from = 0x0; from <= 0x16; from++) {
+    for (long to = 0x0; to <= 0x16; to++) {
       // invalid paths
       // - staying in the same location
       // - from corridor to corridor
@@ -79,17 +89,13 @@ void precalc()
   }
 }
 
-// 01·2·3·4·56
-//   7 9 b d
-//   8 a c e
-
 int main()
 {
   precalc();
 
-  for (long from = 0x0; from <= 0xE; from++) {
+  for (long from = 0x0; from <= 0x16; from++) {
     printf("{ ");
-    for (long to = 0x0; to <= 0xE; to++) {
+    for (long to = 0x0; to <= 0x16; to++) {
       const optional<path>& val = paths[from][to];
       if (val) {
         cout << "path";
@@ -98,7 +104,7 @@ int main()
       else {
         printf("nullopt");
       }
-      if (to != 0xE) printf(", ");
+      if (to != 0x16) printf(", ");
     }
     printf(" },\n");
   }
