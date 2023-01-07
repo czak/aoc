@@ -9,13 +9,6 @@ using path = pair<vector<long>, long>; // path does NOT INCLUDE 'from' but INCLU
 //   9 d 1 5
 //   a e 2 6
 
-const unordered_set<long> rooms[4]{
-  { 0x07, 0x08, 0x09, 0x0A },
-  { 0x0B, 0x0C, 0x0D, 0x0E },
-  { 0x0F, 0x10, 0x11, 0x12 },
-  { 0x13, 0x14, 0x15, 0x16 },
-};
-
 // see day23-precalc.cpp
 const array<array<optional<path>, 0x16+1>, 0x16+1> paths{
   {
@@ -52,64 +45,54 @@ const state multipliers{1, 1, 1, 1, 10, 10, 10, 10, 100, 100, 100, 100, 1000, 10
 long cost(const state& s, long i, long to)
 {
   const long from = s[i];
-  const auto& p = paths[from][to];
+  // which group 'i' belongs to: 0 == A, 1 == B, 2 == C, 3 == D
+  const long group = i / 4;
+  // loc of first chamber in valid room (e.g. 0x07 for A, 0x0B for B, ...)
+  const long room_base = group * 4 + 0x07;
+  // for convenience locations of room chambers (r0 is first chamber from the corridor, r3 is deepest)
+  const long r0 = room_base, r1 = room_base + 1, r2 = room_base + 2, r3 = room_base + 3;
 
   // Invalid moves
   // - no path
+  const auto& p = paths[from][to];
   if (!p) return -1;
 
   // - moving from the corridor into a wrong room
-  if (from <= 0x6) {
-    long group = i / 4; // 0 == A, 1 == B, 2 == C, 3 == D
-    long valid_room_min = group * 4 + 0x07;
-    if (to < valid_room_min || to >= (valid_room_min + 4))
-      return -1;
-  }
+  if (from <= 0x6 && (to < r0 || to > r3))
+    return -1;
 
   // cave occupancy
   // cave[0x7] == -1 means that 1st chamber of cave A is vacant
   // cave[0x8] ==  1 means that 2nd chamber of cave A is inhabited by second amphipod A
-  long cave[15]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  for (long j = 0; j < 8; j++) {
+  long cave[0x16 + 1]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  bool mine[0x16 + 1]{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+  for (long j = 0; j < 16; j++) {
     cave[s[j]] = j;
+    mine[s[j]] = (j / 4 == group); // mine[x] == true if x is occupied by one of my own group
   }
 
-  // - moving into 1st chamber of a correct room but 2nd chamber is currently
-  //   - empty OR
-  //   - occupied by a wrong amphipod
-  // A (0 or 1) trying to move to 0x7 when 0x8 is empty or occupied by non-A
-  if (i == 0 && to == 0x7 && cave[0x8] != 1) return -1;
-  if (i == 1 && to == 0x7 && cave[0x8] != 0) return -1;
-  // B (2 or 3) trying to move to 0x9 when 0xA is empty or occupied by non-B
-  if (i == 2 && to == 0x9 && cave[0xA] != 3) return -1;
-  if (i == 3 && to == 0x9 && cave[0xA] != 2) return -1;
-  // C (4 or 5) trying to move to 0xB when 0xC is empty or occupied by non-C
-  if (i == 4 && to == 0xB && cave[0xC] != 5) return -1;
-  if (i == 5 && to == 0xB && cave[0xC] != 4) return -1;
-  // D (6 or 7) trying to move to 0xD when 0xE is empty or occupied by non-D
-  if (i == 6 && to == 0xD && cave[0xE] != 7) return -1;
-  if (i == 7 && to == 0xD && cave[0xE] != 6) return -1;
+  // moving into the right room but into an invalid chamber
+  // - not all the way in
+  // - or the room is occupied by an incompatible amphipod
+  if (from <= 0x06) {
+    if (to == r2 && !mine[r3])
+      return -1;
+    if (to == r1 && (!mine[r2] || !mine[r3]))
+      return -1;
+    if (to == r0 && (!mine[r1] || !mine[r2] || !mine[r3]))
+      return -1;
+  }
 
   // - trying to move out of a "locked correct" state in correct room
-  if (i == 0 && s[i] == 0x8) return -1;
-  if (i == 0 && s[i] == 0x7 && cave[0x8] == 1) return -1;
-  if (i == 1 && s[i] == 0x8) return -1;
-  if (i == 1 && s[i] == 0x7 && cave[0x8] == 0) return -1;
-
-  if (i == 2 && s[i] == 0xA) return -1;
-  if (i == 2 && s[i] == 0x9 && cave[0xA] == 3) return -1;
-  if (i == 3 && s[i] == 0xA) return -1;
-  if (i == 3 && s[i] == 0x9 && cave[0xA] == 2) return -1;
-
-  if (i == 4 && s[i] == 0xC) return -1;
-  if (i == 4 && s[i] == 0xB && cave[0xC] == 5) return -1;
-  if (i == 5 && s[i] == 0xC) return -1;
-  if (i == 5 && s[i] == 0xB && cave[0xC] == 4) return -1;
-
-  if (i == 6 && s[i] == 0xE) return -1;
-  if (i == 6 && s[i] == 0xD && cave[0xE] == 7) return -1;
-  if (i == 7 && s[i] == 0xE) return -1;
-  if (i == 7 && s[i] == 0xD && cave[0xE] == 6) return -1;
+  if (to <= 0x06) {
+    if (from == r3) return -1;
+    if (from == r2 && (mine[r3]))
+      return -1;
+    if (from == r1 && (mine[r2] && mine[r3]))
+      return -1;
+    if (from == r0 && (mine[r1] && mine[r2] && mine[r3]))
+      return -1;
+  }
 
   // --- from here on we're dealing with valid moves, but the path can be blocked ---
 
@@ -120,46 +103,76 @@ long cost(const state& s, long i, long to)
   return p->second * multipliers[i];
 }
 
-// 01·2·3·4·56
-//   7 b f 3
-//   8 c 0 4
-//   9 d 1 5
-//   a e 2 6
+const __int128_t solved =
+  (__int128_t(0x07) << 0) +
+  (__int128_t(0x08) << 5) +
+  (__int128_t(0x09) << 10) +
+  (__int128_t(0x0A) << 15) +
+  (__int128_t(0x0B) << 20) +
+  (__int128_t(0x0C) << 25) +
+  (__int128_t(0x0D) << 30) +
+  (__int128_t(0x0E) << 35) +
+  (__int128_t(0x0F) << 40) +
+  (__int128_t(0x10) << 45) +
+  (__int128_t(0x11) << 50) +
+  (__int128_t(0x12) << 55) +
+  (__int128_t(0x13) << 60) +
+  (__int128_t(0x14) << 65) +
+  (__int128_t(0x15) << 70) +
+  (__int128_t(0x16) << 75);
 
-long key(const state& s)
+__int128_t key(const state& s)
 {
+  array<__int128_t, 4> ga{s[0], s[1], s[2], s[3]};
+  array<__int128_t, 4> gb{s[4], s[5], s[6], s[7]};
+  array<__int128_t, 4> gc{s[8], s[9], s[10], s[11]};
+  array<__int128_t, 4> gd{s[12], s[13], s[14], s[15]};
+
+  sort(ga.begin(), ga.end());
+  sort(gb.begin(), gb.end());
+  sort(gc.begin(), gc.end());
+  sort(gd.begin(), gd.end());
+
   return
-    (min(s[0], s[1]) << 28) +
-    (max(s[0], s[1]) << 24) +
-    (min(s[2], s[3]) << 20) +
-    (max(s[2], s[3]) << 16) +
-    (min(s[4], s[5]) << 12) +
-    (max(s[4], s[5]) <<  8) +
-    (min(s[6], s[7]) <<  4) +
-    (max(s[6], s[7]) <<  0);
+    (ga[0] << 0) +
+    (ga[1] << 5) +
+    (ga[2] << 10) +
+    (ga[3] << 15) +
+    (gb[0] << 20) +
+    (gb[1] << 25) +
+    (gb[2] << 30) +
+    (gb[3] << 35) +
+    (gc[0] << 40) +
+    (gc[1] << 45) +
+    (gc[2] << 50) +
+    (gc[3] << 55) +
+    (gd[0] << 60) +
+    (gd[1] << 65) +
+    (gd[2] << 70) +
+    (gd[3] << 75);
 }
 
-unordered_map<long, long> memo{};
+map<__int128_t, long> memo{};
 
 // cost of transitioning to a fully-sorted state (all in their respective rooms)
-long solve(state& s)
+long solve(state& s, int level=0)
 {
-  long k = key(s);
+  __int128_t k = key(s);
 
-  if (k == 0x789ABCDE) return 0;
+  if (k == solved) return 0;
 
   if (memo.count(k)) return memo[k];
 
   long best = 1'000'000;
 
-  for (long i = 0; i < 8; i++) {
-    for (long target = 0; target <= 0xE; target++) {
+  for (long i = 0; i < 16; i++) {
+    for (long target = 0; target <= 0x16; target++) {
       long c = cost(s, i, target);
       if (c < 0) continue; // negative means move is not valid
 
       long tmp = s[i];
       s[i] = target;
-      best = min(best, solve(s) + c);
+      best = min(best, solve(s, level+1) + c);
       s[i] = tmp;
     }
   }
@@ -181,17 +194,32 @@ int main()
   // #############
   // #...........#
   // ###B#C#B#D###
+  //   #D#C#B#A#
+  //   #D#B#A#C#
   //   #A#D#C#A#
   //   #########
-  [[maybe_unused]] state example{0x8, 0xE, 0x7, 0xB, 0x9, 0xC, 0xA, 0xD};
+  [[maybe_unused]] state example{
+    0x0A, 0x11, 0x14, 0x16,
+    0x07, 0x0D, 0x0F, 0x10,
+    0x0B, 0x0C, 0x12, 0x15,
+    0x08, 0x09, 0x0E, 0x13,
+  };
 
   // input:
   // #############
   // #...........#
   // ###D#A#C#D###
+  //   #D#C#B#A#
+  //   #D#B#A#C#
   //   #B#C#B#A#
   //   #########
-  state input{0x9, 0xE, 0x8, 0xC, 0xA, 0xB, 0x7, 0xD};
 
-  cout << "Part 1: " << solve(input) << endl;
+  [[maybe_unused]] state input{
+    0x0B, 0x11, 0x14, 0x16,
+    0x0A, 0x0D, 0x10, 0x12,
+    0x0C, 0x0E, 0x0F, 0x15,
+    0x07, 0x08, 0x09, 0x13,
+  };
+
+  cout << "Part 2: " << solve(input) << endl;
 }
