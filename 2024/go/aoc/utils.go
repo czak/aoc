@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"iter"
+	"log"
 )
 
 // Iterate over lines of reader
@@ -16,4 +17,13 @@ func Lines(reader io.Reader) iter.Seq[string] {
 			}
 		}
 	}
+}
+
+// Read from io.Reader until EOF into a string
+func ReadAll(r io.Reader) string {
+	b, err := io.ReadAll(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
 }
