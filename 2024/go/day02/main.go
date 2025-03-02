@@ -25,6 +25,7 @@ func main() {
 	reports := parse(input)
 
 	part1(reports)
+	part2(reports)
 }
 
 func parse(input string) []Report {
@@ -49,6 +50,29 @@ func part1(reports []Report) {
 	for _, report := range reports {
 		if isSafe(report) {
 			count++
+		}
+	}
+
+	fmt.Println(count)
+}
+
+func part2(reports []Report) {
+	count := 0
+
+	for _, report := range reports {
+		if isSafe(report) {
+			count++
+			continue
+		}
+		for i := range len(report) {
+			modified := Report{}
+			modified = append(modified, report[:i]...)
+			modified = append(modified, report[i+1:]...)
+
+			if isSafe(modified) {
+				count++
+				break
+			}
 		}
 	}
 
