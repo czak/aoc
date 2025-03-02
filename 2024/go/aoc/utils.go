@@ -27,3 +27,11 @@ func ReadAll(r io.Reader) string {
 	}
 	return string(b)
 }
+
+func Map[T1, T2 any](s []T1, f func(T1) T2) []T2 {
+	var res []T2
+	for _, v := range s {
+		res = append(res, f(v))
+	}
+	return res
+}
