@@ -45,24 +45,13 @@ func parse(input string) []Report {
 }
 
 func part1(reports []Report) {
-	count := 0
-
-	for _, report := range reports {
-		if isSafe(report) {
-			count++
-		}
-	}
-
-	fmt.Println(count)
+	fmt.Println(aoc.Count(reports, isSafe))
 }
 
 func part2(reports []Report) {
-	count := 0
-
-	for _, report := range reports {
+	count := aoc.Count(reports, func(report Report) bool {
 		if isSafe(report) {
-			count++
-			continue
+			return true
 		}
 		for i := range len(report) {
 			modified := Report{}
@@ -70,11 +59,11 @@ func part2(reports []Report) {
 			modified = append(modified, report[i+1:]...)
 
 			if isSafe(modified) {
-				count++
-				break
+				return true
 			}
 		}
-	}
+		return false
+	})
 
 	fmt.Println(count)
 }
@@ -89,19 +78,11 @@ func isSafe(report Report) bool {
 		3:  1,
 	}
 
-	a := report[0]
-	b := report[1]
-	prevScore := scores[b-a]
+	total := 0
 
-	for _, b = range report[1:] {
-		score := scores[b-a]
-		if score == 0 || score != prevScore {
-			return false
-		}
-
-		a = b
-		prevScore = score
+	for i := range len(report) - 1 {
+		total += scores[report[i+1]-report[i]]
 	}
 
-	return true
+	return total == -len(report)+1 || total == len(report)-1
 }

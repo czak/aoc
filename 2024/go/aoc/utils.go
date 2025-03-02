@@ -35,3 +35,14 @@ func Map[T1, T2 any](s []T1, f func(T1) T2) []T2 {
 	}
 	return res
 }
+
+// Count how many elements in s satisfy f
+func Count[T1 any](s []T1, f func(T1) bool) int {
+	count := 0
+	for _, v := range s {
+		if f(v) {
+			count++
+		}
+	}
+	return count
+}
