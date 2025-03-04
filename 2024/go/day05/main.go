@@ -61,22 +61,23 @@ func main() {
 		updates = append(updates, aoc.Map(strings.Split(line, ","), aoc.Atoi))
 	}
 
-	part1(rules, updates)
-}
-
-func part1(rules map[ab]int, updates [][]int) {
-	total := 0
+	total1 := 0
+	total2 := 0
 
 	for _, update := range updates {
 		sorted := slices.Clone(update)
+
 		slices.SortFunc(sorted, func(a, b int) int {
 			return rules[ab{a, b}]
 		})
 
 		if slices.Equal(update, sorted) {
-			total += update[len(update)/2]
+			total1 += update[len(update)/2]
+		} else {
+			total2 += sorted[len(sorted)/2]
 		}
 	}
 
-	fmt.Println(total)
+	fmt.Println(total1)
+	fmt.Println(total2)
 }
