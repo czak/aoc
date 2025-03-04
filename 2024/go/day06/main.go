@@ -30,9 +30,12 @@ func main() {
 
 	g := aoc.ParseGrid(input)
 
-	var pos, dir vec
-	pos.x, pos.y, _ = g.Find('^')
-	dir.x, dir.y = 0, -1
+	var startPos, startDir vec
+	startPos.x, startPos.y, _ = g.Find('^')
+	startDir.x, startDir.y = 0, -1
+
+	pos := startPos
+	dir := startDir
 
 	visited := map[vec]bool{}
 
@@ -49,6 +52,42 @@ func main() {
 	}
 
 	fmt.Println(len(visited))
+
+	count := 0
+
+	for candidate := range visited {
+		// place obstacle
+		g[candidate.y][candidate.x] = '#'
+
+		pos = startPos
+		dir = startDir
+
+		// track both position and dir to detect loops
+		visited2 := map[[2]vec]bool{}
+
+		for g.At(pos.x, pos.y) != ' ' {
+			// have we been here before?
+			if visited2[[2]vec{pos, dir}] {
+				count++
+				break
+			}
+
+			visited2[[2]vec{pos, dir}] = true
+
+			if g.At(pos.x+dir.x, pos.y+dir.y) == '#' {
+				dir = rotate(dir)
+				continue
+			}
+
+			pos.x += dir.x
+			pos.y += dir.y
+		}
+
+		// remove obstacle
+		g[candidate.y][candidate.x] = '.'
+	}
+
+	fmt.Println(count)
 }
 
 func rotate(dir vec) vec {
