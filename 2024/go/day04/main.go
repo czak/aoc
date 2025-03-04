@@ -28,10 +28,6 @@ func (g Grid) at(x, y int) rune {
 	return g[y][x]
 }
 
-func (g Grid) mas(x, y int, dx, dy int) bool {
-	return g.at(x+dx, y+dy) == 'M' && g.at(x+2*dx, y+2*dy) == 'A' && g.at(x+3*dx, y+3*dy) == 'S'
-}
-
 func main() {
 	// input := ex1
 	input := aoc.ReadAll(os.Stdin)
@@ -44,6 +40,23 @@ func main() {
 		g = append(g, []rune(row))
 	}
 
+	count1 := 0
+	count2 := 0
+
+	for y := range len(g) {
+		for x := range len(g[0]) {
+			count1 += find1(g, x, y)
+			count2 += find2(g, x, y)
+		}
+	}
+
+	fmt.Println(count1)
+	fmt.Println(count2)
+}
+
+func find1(g Grid, x, y int) int {
+	count := 0
+
 	deltas := [][2]int{
 		{-1, -1},
 		{-1, 0},
@@ -55,21 +68,35 @@ func main() {
 		{1, 1},
 	}
 
-	count := 0
+	if g.at(x, y) != 'X' {
+		return 0
+	}
 
-	for y := range len(g) {
-		for x := range len(g[0]) {
-			if g.at(x, y) != 'X' {
-				continue
-			}
-
-			for _, d := range deltas {
-				if g.mas(x, y, d[0], d[1]) {
-					count++
-				}
-			}
+	for _, d := range deltas {
+		dx, dy := d[0], d[1]
+		if g.at(x+dx, y+dy) == 'M' && g.at(x+2*dx, y+2*dy) == 'A' && g.at(x+3*dx, y+3*dy) == 'S' {
+			count++
 		}
 	}
 
-	fmt.Println(count)
+	return count
+}
+
+func find2(g Grid, x, y int) int {
+	if g.at(x, y) != 'A' {
+		return 0
+	}
+
+	m := map[rune]int{}
+
+	m[g.at(x-1, y-1)]++
+	m[g.at(x+1, y-1)]++
+	m[g.at(x-1, y+1)]++
+	m[g.at(x+1, y+1)]++
+
+	if m['M'] == 2 && m['S'] == 2 {
+		return 1
+	}
+
+	return 0
 }
