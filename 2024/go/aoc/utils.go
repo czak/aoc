@@ -5,6 +5,7 @@ import (
 	"io"
 	"iter"
 	"log"
+	"strconv"
 )
 
 // Iterate over lines of reader
@@ -45,4 +46,13 @@ func Count[T1 any](s []T1, f func(T1) bool) int {
 		}
 	}
 	return count
+}
+
+// Atoi but panics on error
+func Atoi(s string) int {
+	val, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
