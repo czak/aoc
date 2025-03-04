@@ -87,14 +87,16 @@ func find2(g Grid, x, y int) int {
 		return 0
 	}
 
-	m := map[rune]int{}
+	d1 := map[rune]int{}
+	d2 := map[rune]int{}
 
-	m[g.at(x-1, y-1)]++
-	m[g.at(x+1, y-1)]++
-	m[g.at(x-1, y+1)]++
-	m[g.at(x+1, y+1)]++
+	d1[g.at(x-1, y-1)]++
+	d1[g.at(x+1, y+1)]++
 
-	if m['M'] == 2 && m['S'] == 2 {
+	d2[g.at(x-1, y+1)]++
+	d2[g.at(x+1, y-1)]++
+
+	if d1['M'] == 1 && d1['S'] == 1 && d2['M'] == 1 && d2['S'] == 1 {
 		return 1
 	}
 
