@@ -30,13 +30,10 @@ func (g Grid) at(x, y int) rune {
 
 func main() {
 	// input := ex1
-	input := aoc.ReadAll(os.Stdin)
+	input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
 
 	var g Grid
 	for row := range strings.SplitSeq(input, "\n") {
-		if len(row) == 0 {
-			break
-		}
 		g = append(g, []rune(row))
 	}
 
@@ -87,16 +84,16 @@ func find2(g Grid, x, y int) int {
 		return 0
 	}
 
-	d1 := map[rune]int{}
-	d2 := map[rune]int{}
+	d1 := map[rune]bool{
+		g.at(x-1, y-1): true,
+		g.at(x+1, y+1): true,
+	}
+	d2 := map[rune]bool{
+		g.at(x-1, y+1): true,
+		g.at(x+1, y-1): true,
+	}
 
-	d1[g.at(x-1, y-1)]++
-	d1[g.at(x+1, y+1)]++
-
-	d2[g.at(x-1, y+1)]++
-	d2[g.at(x+1, y-1)]++
-
-	if d1['M'] == 1 && d1['S'] == 1 && d2['M'] == 1 && d2['S'] == 1 {
+	if d1['M'] && d1['S'] && d2['M'] && d2['S'] {
 		return 1
 	}
 
