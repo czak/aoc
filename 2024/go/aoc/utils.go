@@ -37,6 +37,14 @@ func Map[T1, T2 any](s []T1, f func(T1) T2) []T2 {
 	return res
 }
 
+func Reduce[T1, T2 any](s []T1, i T2, f func(acc T2, item T1) T2) T2 {
+	acc := i
+	for _, v := range s {
+		acc = f(acc, v)
+	}
+	return acc
+}
+
 // Count how many elements in s satisfy f
 func Count[T1 any](s []T1, f func(T1) bool) int {
 	count := 0

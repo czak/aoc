@@ -39,20 +39,17 @@ func main() {
 		})
 	}
 
-	count(equations, []operator{add, mul})
-	count(equations, []operator{add, mul, concat})
+	println(count(equations, []operator{add, mul}))
+	println(count(equations, []operator{add, mul, concat}))
 }
 
-func count(equations []equation, ops []operator) {
-	total := 0
-
-	for _, e := range equations {
+func count(equations []equation, ops []operator) int {
+	return aoc.Reduce(equations, 0, func(total int, e equation) int {
 		if valid(e, ops) {
-			total += e.test
+			return total + e.test
 		}
-	}
-
-	fmt.Println(total)
+		return total
+	})
 }
 
 func valid(e equation, ops []operator) bool {
