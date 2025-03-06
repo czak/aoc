@@ -62,8 +62,7 @@ func main() {
 
 	antinodes := map[vec]bool{}
 
-	for freq, locations := range antennas {
-		fmt.Println("Freq", freq)
+	for _, locations := range antennas {
 		for pair := range pairs(locations) {
 			a := pair[0]
 			b := pair[1]
@@ -74,8 +73,6 @@ func main() {
 
 			antinodes[u] = true
 			antinodes[v] = true
-
-			fmt.Println(pair, u, v)
 		}
 	}
 
@@ -83,7 +80,6 @@ func main() {
 
 	for n := range antinodes {
 		if n.within(xmax, ymax) {
-			fmt.Println(n)
 			count++
 		}
 	}
