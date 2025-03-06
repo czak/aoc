@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"czak.pl/aoc2024/aoc"
@@ -57,12 +58,9 @@ func valid(e equation, ops []operator) bool {
 		return e.test == e.values[0]
 	}
 
-	for _, op := range ops {
-		if valid(equation{e.test, append([]int{op(e.values[0], e.values[1])}, e.values[2:]...)}, ops) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(ops, func(op operator) bool {
+		return valid(equation{e.test, append([]int{op(e.values[0], e.values[1])}, e.values[2:]...)}, ops)
+	})
 }
 
 func add(a, b int) int    { return a + b }
