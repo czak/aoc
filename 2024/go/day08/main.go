@@ -22,6 +22,17 @@ const ex1 = `............
 ............
 ............`
 
+const ex2 = `T.........
+...T......
+.T........
+..........
+..........
+..........
+..........
+..........
+..........
+..........`
+
 type (
 	vec  [2]int
 	pair [2]vec
@@ -68,11 +79,17 @@ func main() {
 			b := pair[1]
 			diff := b.sub(a)
 
-			u := a.sub(diff)
-			v := b.sub(vec{0, 0}.sub(diff))
+			u := a
+			for u.within(xmax, ymax) {
+				antinodes[u] = true
+				u = u.sub(diff)
+			}
 
-			antinodes[u] = true
-			antinodes[v] = true
+			v := b
+			for v.within(xmax, ymax) {
+				antinodes[v] = true
+				v = v.sub(vec{0, 0}.sub(diff))
+			}
 		}
 	}
 
