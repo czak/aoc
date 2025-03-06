@@ -56,13 +56,8 @@ func count(equations []equation, ops []operator) {
 }
 
 func valid(e equation, ops []operator) bool {
-	if len(e.values) == 2 {
-		for _, op := range ops {
-			if e.test == op(e.values[0], e.values[1]) {
-				return true
-			}
-		}
-		return false
+	if len(e.values) == 1 {
+		return e.test == e.values[0]
 	}
 
 	for _, op := range ops {
