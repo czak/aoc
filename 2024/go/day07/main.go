@@ -23,6 +23,8 @@ type equation struct {
 	values []int
 }
 
+type operator func(int, int) int
+
 func main() {
 	// input := ex1
 	input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
@@ -37,9 +39,15 @@ func main() {
 		})
 	}
 
+	count(equations, []operator{add, mul})
+	count(equations, []operator{add, mul, concat})
+}
+
+func count(equations []equation, ops []operator) {
 	total := 0
+
 	for _, e := range equations {
-		if valid(e) {
+		if valid(e, ops) {
 			total += e.test
 		}
 	}
@@ -47,24 +55,24 @@ func main() {
 	fmt.Println(total)
 }
 
-func valid(e equation) bool {
-	// only 2 left, just check + or * or ||
+func valid(e equation, ops []operator) bool {
 	if len(e.values) == 2 {
-		return e.test == e.values[0]+e.values[1] || e.test == e.values[0]*e.values[1] || e.test == combine(e.values[0], e.values[1])
+		for _, op := range ops {
+			if e.test == op(e.values[0], e.values[1]) {
+				return true
+			}
+		}
+		return false
 	}
 
-	return valid(equation{
-		test:   e.test,
-		values: append([]int{e.values[0] + e.values[1]}, e.values[2:]...),
-	}) || valid(equation{
-		test:   e.test,
-		values: append([]int{e.values[0] * e.values[1]}, e.values[2:]...),
-	}) || valid(equation{
-		test:   e.test,
-		values: append([]int{combine(e.values[0], e.values[1])}, e.values[2:]...),
-	})
+	for _, op := range ops {
+		if valid(equation{e.test, append([]int{op(e.values[0], e.values[1])}, e.values[2:]...)}, ops) {
+			return true
+		}
+	}
+	return false
 }
 
-func combine(a, b int) int {
-	return aoc.Atoi(fmt.Sprintf("%d%d", a, b))
-}
+func add(a, b int) int    { return a + b }
+func mul(a, b int) int    { return a * b }
+func concat(a, b int) int { return aoc.Atoi(fmt.Sprintf("%d%d", a, b)) }
