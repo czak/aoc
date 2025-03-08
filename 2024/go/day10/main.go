@@ -25,8 +25,9 @@ const ex2 = `89010123
 10456732`
 
 type (
-	grid [][]int
-	vec  [2]int
+	grid  [][]int
+	vec   [2]int
+	route [10]vec
 )
 
 func (g grid) at(x, y int) int {
@@ -41,7 +42,8 @@ func main() {
 	input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
 	g := parse(input)
 
-	total := 0
+	totalPeaks := 0
+	totalRoutes := 0
 
 	for y := range len(g) {
 		for x := range len(g[0]) {
@@ -50,33 +52,41 @@ func main() {
 			}
 
 			peaks := map[vec]bool{}
-			climb(g, x, y, peaks)
-			total += len(peaks)
+			routes := map[route]bool{}
+
+			climb(g, x, y, route{}, peaks, routes)
+
+			totalPeaks += len(peaks)
+			totalRoutes += len(routes)
 		}
 	}
 
-	fmt.Println(total)
+	fmt.Println(totalPeaks)
+	fmt.Println(totalRoutes)
 }
 
-func climb(g grid, x, y int, peaks map[vec]bool) {
+func climb(g grid, x, y int, r route, peaks map[vec]bool, routes map[route]bool) {
 	level := g.at(x, y)
+
+	r[level] = vec{x, y}
 
 	if level == 9 {
 		peaks[vec{x, y}] = true
+		routes[r] = true
 		return
 	}
 
 	if g.at(x, y-1) == level+1 {
-		climb(g, x, y-1, peaks)
+		climb(g, x, y-1, r, peaks, routes)
 	}
 	if g.at(x+1, y) == level+1 {
-		climb(g, x+1, y, peaks)
+		climb(g, x+1, y, r, peaks, routes)
 	}
 	if g.at(x, y+1) == level+1 {
-		climb(g, x, y+1, peaks)
+		climb(g, x, y+1, r, peaks, routes)
 	}
 	if g.at(x-1, y) == level+1 {
-		climb(g, x-1, y, peaks)
+		climb(g, x-1, y, r, peaks, routes)
 	}
 }
 
