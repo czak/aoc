@@ -2,6 +2,31 @@ package main
 
 import "fmt"
 
+// 140
+const ex1 = `AAAA
+BBCD
+BBCC
+EEEC`
+
+// 772 (756 + 4 + 4 + 4 + 4)
+const ex2 = `OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO`
+
+// 1930
+const ex3 = `RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE`
+
 func main() {
 	fmt.Println("day12")
 }
