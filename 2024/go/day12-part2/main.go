@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"czak.pl/aoc2024/aoc"
 )
@@ -30,6 +32,13 @@ VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE`
+
+// 236
+const ex4 = `EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE`
 
 type (
 	vec  [2]int
@@ -68,8 +77,8 @@ func zip(a, b []int) [][2]int {
 }
 
 func main() {
-	input := ex1
-	// input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
+	// input := ex3
+	input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
 
 	g := partition(aoc.ParseGrid(input))
 
@@ -87,12 +96,22 @@ func main() {
 	for y := range len(g) + 1 {
 		pairs := zip(g.row(y-1), g.row(y))
 		// pairs = slices.Compact(pairs)
+		var ba, bb int
 		for _, pair := range pairs {
 			a := pair[0]
 			b := pair[1]
 			if a != b {
-				perimeters[a]++
-				perimeters[b]++
+				if a != ba {
+					perimeters[a]++
+					ba = a
+				}
+				if b != bb {
+					perimeters[b]++
+					bb = b
+				}
+			} else {
+				ba = -1
+				bb = -1
 			}
 		}
 	}
@@ -100,13 +119,22 @@ func main() {
 	// perimeters - cols
 	for x := range len(g[0]) + 1 {
 		pairs := zip(g.col(x-1), g.col(x))
-		// pairs = slices.Compact(pairs)
+		var ba, bb int
 		for _, pair := range pairs {
 			a := pair[0]
 			b := pair[1]
 			if a != b {
-				perimeters[a]++
-				perimeters[b]++
+				if a != ba {
+					perimeters[a]++
+					ba = a
+				}
+				if b != bb {
+					perimeters[b]++
+					bb = b
+				}
+			} else {
+				ba = -1
+				bb = -1
 			}
 		}
 	}
