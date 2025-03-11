@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -42,20 +43,80 @@ func main() {
 	// input := ex1
 	input := strings.TrimSpace(aoc.ReadAll(os.Stdin))
 
-	total := 0
+	part1 := 0
+	part2 := 0
 
 	for block := range strings.SplitSeq(input, "\n\n") {
 		var ax, ay, bx, by, tx, ty int
 		fmt.Sscanf(block, "Button A: X+%d, Y+%d\nButton B: X+%d, Y+%d\nPrize: X=%d, Y=%d", &ax, &ay, &bx, &by, &tx, &ty)
 
-		clear(memo)
-		cost := solve(vec{tx, ty}, vec{ax, ay}, vec{bx, by})
-		if cost < 1_000_000 {
-			total += cost
+		// clear(memo)
+		// cost := solve(vec{tx, ty}, vec{ax, ay}, vec{bx, by})
+
+		cost1, err := linsolve(vec{tx, ty}, vec{ax, ay}, vec{bx, by})
+		if err == nil {
+			part1 += cost1
 		}
+
+		cost2, err := linsolve(vec{tx + 10000000000000, ty + 10000000000000}, vec{ax, ay}, vec{bx, by})
+		if err == nil {
+			part2 += cost2
+		}
+
+		fmt.Println("cost 1", cost1)
+		fmt.Println("cost 2", cost2)
+		fmt.Println()
 	}
 
-	fmt.Println(total)
+	fmt.Println(part1)
+	fmt.Println(part2)
+}
+
+// t = x * a + y * b
+func linsolve(t vec, a, b vec) (int, error) {
+	m1 := b.x
+	m2 := b.y
+
+	a.x *= m2
+	b.x *= m2
+	t.x *= m2
+
+	a.y *= m1
+	b.y *= m1
+	t.y *= m1
+
+	fmt.Println(a.x, "*x +", b.x, "*y =", t.x)
+	fmt.Println(a.y, "*x +", b.y, "*y =", t.y)
+
+	dx := a.x - a.y
+	dt := t.x - t.y
+
+	fmt.Println(dx, " * x = ", dt)
+
+	// is there an integer x?
+	if dt%dx != 0 {
+		return 0, errors.New("no solution")
+	}
+
+	x := dt / dx
+
+	a.x *= x
+
+	fmt.Println(a.x, "+", b.x, "*y =", t.x)
+
+	dy := b.x
+	dt = t.x - a.x
+
+	// is there an integer y?
+	if dt%dy != 0 {
+		return 0, errors.New("no solution")
+	}
+
+	y := dt / dy
+
+	fmt.Println(x, y)
+
+	return 3*x + y, nil
 }
 
 func solve(t vec, va, vb vec) int {
